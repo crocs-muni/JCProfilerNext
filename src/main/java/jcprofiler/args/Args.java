@@ -29,24 +29,24 @@ public class Args {
     public boolean debug = false;
 
     @Parameter(names = {"-w", "--work-dir"},
-               description = "Path to the working directory",
+               description = "Path to the working directory (required)",
                required = true,
                converter = DirectoryPathConverter.class)
     public Path workDir;
 
     @Parameter(names = {"--start-from"},
-               description = "Start from executing the given stage",
+               description = "Start from executing the given stage(default: instrumentation)",
                converter = StageConverter.class)
     public Stage startFrom = Stage.instrumentation;
 
     @Parameter(names = {"--stop-after"},
-               description = "Stop after executing the given stage",
+               description = "Stop after executing the given stage (default: visualisation)",
                converter = StageConverter.class)
     public Stage stopAfter = Stage.visualisation;
 
     @Parameter(names = {"--jckit"},
                required = true,
-               description = "Path to the root directory with JavaCard development kit",
+               description = "Path to the root directory with JavaCard development kit (required)",
                converter = JCKitConverter.class)
     public JavaCardSDK jcSDK;
 
@@ -76,7 +76,7 @@ public class Args {
     public byte[] installParams;
 
     @Parameter(names = {"--mode"},
-               description = "Measure the selected characteristic",
+               description = "Measure the selected characteristic (default: time)",
                converter = ModeConverter.class)
     public Mode mode = Mode.time;
 
@@ -96,7 +96,7 @@ public class Args {
     public Path customHandler;
 
     @Parameter(names = {"--repeat-count"},
-               description = "Number of profiling rounds (custom or time profiling only)",
+               description = "Number of profiling rounds (custom or time profiling only) (default: 1000)",
                validateWith = PositiveIntegerValidator.class)
     public int repeatCount = 1000;
 
@@ -106,22 +106,22 @@ public class Args {
     public Byte resetIns;
 
     @Parameter(names = {"--cla"},
-               description = "Applet CLA in hex",
+               description = "Applet CLA in hex (default: 0x00)",
                converter = ByteConverter.class)
     public byte cla = 0;
 
     @Parameter(names = {"--ins"},
-               description = "Applet instruction in hex",
+               description = "Applet instruction in hex (default: 0x00)",
                converter = ByteConverter.class)
     public byte ins = 0;
 
     @Parameter(names = {"--p1"},
-               description = "Applet P1 in hex",
+               description = "Applet P1 in hex (default: 0x00)",
                converter = ByteConverter.class)
     public byte p1 = 0;
 
     @Parameter(names = {"--p2"},
-               description = "Applet P2 in hex",
+               description = "Applet P2 in hex (default: 0x00)",
                converter = ByteConverter.class)
     public byte p2 = 0;
 
@@ -136,12 +136,12 @@ public class Args {
     public Path dataFile;
 
     @Parameter(names = {"--input-division"},
-               description = "Divide generated inputs into two categories based on given characteristic",
+               description = "Divide generated inputs into two categories based on given characteristic (default: none)",
                converter = InputDivisionConverter.class)
     public InputDivision inputDivision = InputDivision.none;
 
     @Parameter(names = {"--time-unit"},
-               description = "Time unit to be used in result visualisation (time profiling only)",
+               description = "Time unit to be used in result visualisation (time profiling only) (default: micro)",
                converter = TimeUnitConverter.class)
     public TimeUnit timeUnit = TimeUnit.micro;
 }

@@ -135,8 +135,11 @@ public class Example extends Applet {
 Run as:
 [source,console]
 ----
-$ ./gradlew run --args="--work-dir example --jckit jc222_kit --executable example --ins 0xEE --data-regex 00[0-9A-F]{2} --repeat-count 100"
+$ ./gradlew run --args="--work-dir example --jckit jc222_kit --entry-point example.Example --executable example --ins 0xEE --data-regex 00[0-9A-F]{2} --repeat-count 100"
 ----
+The `--entry-point` value is the *fully-qualified class name* (`package.ClassName`).
+The `--executable` value is the *unqualified method name* (`methodName`).
+
 JCProfilerNext will process all sources in the `example` directory and will
 also use this directory to store all intermediate results:
 

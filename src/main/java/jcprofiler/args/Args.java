@@ -62,12 +62,13 @@ public class Args {
     public boolean useSimulator = false;
 
     @Parameter(names = {"--executable"},
-               description = "Constructor or method to profile or leave unset to instrument applet entry point " +
-                             "constructor (constructors are custom and memory profiling only)")
+               description = "Unqualified method name to profile (e.g. myMethod). " +
+                             "Omit to profile the entry-point class constructor (constructors: custom and memory mode only)")
     public String executable;
 
     @Parameter(names = {"--entry-point"},
-               description = "Qualified name of a class to be used as an entry point (useful when there are more)")
+               description = "Fully-qualified class name of the applet entry point (e.g. com.example.MyApplet). " +
+                             "Required when the working directory contains more than one applet class")
     public String entryPoint;
 
     @Parameter(names = {"--install-params"},

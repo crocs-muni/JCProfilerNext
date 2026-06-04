@@ -27,6 +27,8 @@ Prerequisites
 -------------
 * Install JDK 8 or newer.
 * Obtain a copy of the JavaCard Development Kit, e.g. from this link:https://github.com/martinpaljak/oracle_javacard_sdks[GitHub archive] maintained by Martin Paljak.
+* [Real card only] The card must have sufficient free EEPROM space for your applet.  The instrumented applet is larger than the original (profiling traps are inserted), so ensure a few extra kilobytes are available.  Use `--simulator` to avoid this requirement entirely.
+* [Real card only] A PC/SC-compatible smart card reader and its drivers must be installed.
 
 .Compatibility Matrix
 [cols="^1,^2"]

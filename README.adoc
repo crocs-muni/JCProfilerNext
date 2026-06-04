@@ -57,6 +57,10 @@ Compilation
 .. directly using Gradle: `./gradlew run --args='--help'`.
 .. directly using built JAR: `java -jar build/libs/JCProfilerNext-1.0-SNAPSHOT.jar --help`.
 .. directly from distribution archives in `build/distributions`.
+.. as a standalone binary (recommended): run `./gradlew installDist`, then use
+   `build/install/JCProfilerNext/bin/JCProfilerNext` (Unix) or
+   `build\install\JCProfilerNext\bin\JCProfilerNext.bat` (Windows).
+   You can add this `bin/` directory to your `PATH` for convenient access.
 
 Profiling Applet Uninstallation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

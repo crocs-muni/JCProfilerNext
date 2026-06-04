@@ -50,6 +50,7 @@ public class Main {
         // show help
         if (args.help) {
             jc.usage();
+            printHelpExtras();
             return;
         }
 
@@ -80,6 +81,37 @@ public class Main {
             log.error("Caught exception!", e);
             System.exit(1);
         }
+    }
+
+    private static void printHelpExtras() {
+        System.out.println();
+        System.out.println("ARGUMENT STRUCTURE");
+        System.out.println("  Required arguments for a profiling run: --work-dir and --jckit.");
+        System.out.println("  Hex values (--cla, --ins, --p1, --p2, --reset-ins) accept either a plain");
+        System.out.println("  hex number (e.g. EE) or a 0x-prefixed value (e.g. 0xEE).");
+        System.out.println("  Either --data-regex or --data-file must be provided when profiling a method");
+        System.out.println("  (not needed for memory profiling of the constructor or stats mode).");
+        System.out.println();
+        System.out.println("EXAMPLES");
+        System.out.println();
+        System.out.println("  # Profile the 'example' method using the simulator (time mode, default):");
+        System.out.println("  JCProfilerNext --work-dir my_applet --jckit path/to/jc222_kit \\");
+        System.out.println("                 --executable example --ins 0xEE \\");
+        System.out.println("                 --data-regex 00[0-9A-F]{2} --simulator");
+        System.out.println();
+        System.out.println("  # Measure memory usage during applet installation (constructor):");
+        System.out.println("  JCProfilerNext --work-dir my_applet --jckit path/to/jc304_kit --mode memory");
+        System.out.println();
+        System.out.println("  # Collect API usage statistics:");
+        System.out.println("  JCProfilerNext --work-dir my_applet --jckit path/to/jc222_kit --mode stats");
+        System.out.println();
+        System.out.println("  # Run only instrumentation and compilation, skip installation/profiling:");
+        System.out.println("  JCProfilerNext --work-dir my_applet --jckit path/to/jc222_kit \\");
+        System.out.println("                 --stop-after compilation");
+        System.out.println();
+        System.out.println("REPORTING BUGS");
+        System.out.println("  If you encounter an unexpected error, re-run with --debug, save the output,");
+        System.out.println("  and open an issue at https://github.com/crocs-muni/JCProfilerNext");
     }
 
     /**

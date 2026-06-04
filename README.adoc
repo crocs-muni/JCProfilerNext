@@ -8,6 +8,21 @@ that provides a completely automated preprocessing, compilation, installation
 and profiling of JavaCard code on JavaCard smart cards or in the jCardSim
 simulator.
 
+Why profiling?
+--------------
+* *Side-channel security* -- non-constant execution time or memory usage can leak secret key material.  The per-trap histograms immediately reveal whether a branch or loop depends on secret data.
+* *Performance optimisation* -- identify slow operations and decide whether to move them to native JavaCard commands.
+* *Hardware validation* -- confirm that your applet behaves identically on the real card and in the simulator before deployment.
+
+What You Get
+~~~~~~~~~~~~
+After a successful run, JCProfilerNext produces:
+
+* timing or memory measurements,
+* an interactive visualisation of those measurements with per-line histograms,
+* original source files annotated with inline measurement comments,
+* frequency table of every JavaCard API call made by your applet (stats mode only).
+
 Prerequisites
 -------------
 * Install JDK 8 or newer.

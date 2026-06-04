@@ -58,6 +58,12 @@ Compilation
 .. directly using built JAR: `java -jar build/libs/JCProfilerNext-1.0-SNAPSHOT.jar --help`.
 .. directly from distribution archives in `build/distributions`.
 
+Profiling Applet Uninstallation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+If you installed an applet on a real card during a profiling run, remove it using
+link:https://github.com/martinpaljak/GlobalPlatformPro[GlobalPlatformPro]:
+The default package AID is `123456789001` and the default applet AID is `12345678900101`.
+
 Execution modes
 ---------------
 The tool can be executed in four different modes (select with `--mode`):

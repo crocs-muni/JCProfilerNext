@@ -220,6 +220,28 @@ javacard.security,KeyPair,genKeyPair(),1
 javacard.security,KeyPair,"KeyPair(byte,short)",1
 ----
 
+FAQ
+---
+
+*My card is not recognised / connection fails.*::
+  Check that a PC/SC driver for your reader is installed and that no other application is locking the card.
+
+*Compilation fails with a javac error.*::
+  Verify that your JDK version is compatible with the target JavaCard SDK — see the Compatibility Matrix.
+  JDK 8 offers the widest compatibility (JavaCard 2.2.1+).
+
+*The tool crashes with an unexpected exception.*::
+  Re-run with `--debug`, collect the full output, and open an issue at
+  https://github.com/crocs-muni/JCProfilerNext.
+  Please include the `--debug` log and the exact command you ran.
+
+*Measurements are inconsistent between runs.*::
+  Increase `--repeat-count` (default: 1000) to reduce statistical noise.
+
+*What JDK should I use?*::
+  JDK 8 is recommended for the widest JavaCard SDK compatibility.
+  See the Compatibility Matrix under _Prerequisites_ for details.
+
 Limitations
 -----------
 

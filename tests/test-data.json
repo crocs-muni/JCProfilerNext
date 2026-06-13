@@ -207,7 +207,10 @@
             "repo": "https://github.com/philipWendland/IsoApplet",
             "path": "src",
             "jckit": "304",
-            "subtests": []
+            "failure": {
+                "stopAfter": "compilation",
+                "reason": "Installation: constructor requires working object deletion"
+            }
         },
         {
             "name": "JavacardIdentity",

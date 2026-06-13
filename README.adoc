@@ -1,7 +1,7 @@
 JCProfilerNext
 ==============
 
-link:https://github.com/lzaoral/JCProfilerNext/actions/workflows/ci.yml[image:https://github.com/lzaoral/JCProfilerNext/actions/workflows/ci.yml/badge.svg[Java CI with Gradle]]
+link:https://github.com/crocs-muni/JCProfilerNext/actions/workflows/ci.yml[image:https://github.com/crocs-muni/JCProfilerNext/actions/workflows/ci.yml/badge.svg[Java CI with Gradle]]
 
 JCProfilerNext is a complete rewrite of link:https://github.com/OpenCryptoProject/JCProfiler[OpenCryptoProject/JCProfiler]
 that provides a completely automated preprocessing, compilation, installation
@@ -112,7 +112,7 @@ also use this directory to store all intermediate results:
 * `sources_original` - contains original unchanged sources
 * `sources_perf` - contains sources with inserted measurements as inline comments
 
-If you open the corresponding link:https://lzaoral.github.io/JCProfilerNext/example-time.html[`measurements.html`]
+If you open the corresponding link:https://crocs-muni.github.io/JCProfilerNext/example-time.html[`measurements.html`]
 produced by JCProfilerNext, you will see that some parts of the code are indeed
 not constant, namely if you inspect the corresponding histograms of traps
 after the `for` loops.
@@ -158,7 +158,7 @@ JCProfilerNext will produce the same directory structure as in the time mode
 above.  The `--executable` option is omitted because we want to measure memory
 usage in the entry point class constructor. Note that the allocation of transient
 deselect memory may also affect the amount of free transient memory and vice versa.
-See link:https://lzaoral.github.io/JCProfilerNext/example-memory.html[`measurements.html`]
+See link:https://crocs-muni.github.io/JCProfilerNext/example-memory.html[`measurements.html`]
 for visualisation of the measurements.
 
 Stats Example

@@ -1070,15 +1070,21 @@
             "entryPoints": [
                 {
                     "name": "im.status.keycard.CashApplet",
-                    "subtests": []
+                    "failure": {
+                        "reason": "Instrumentation: the import BigNumberMath cannot be resolved"
+                    }
                 },
                 {
                     "name": "im.status.keycard.KeycardApplet",
-                    "subtests": []
+                    "failure": {
+                        "reason": "Instrumentation: the import BigNumberMath cannot be resolved"
+                    }
                 },
                 {
                     "name": "im.status.keycard.NDEFApplet",
-                    "subtests": []
+                    "failure": {
+                        "reason": "Instrumentation: the import BigNumberMath cannot be resolved"
+                    }
                 }
             ]
         },

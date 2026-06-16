@@ -209,3 +209,14 @@ Limitations
 * Cards that require special communication procedures (e.g. `SecureChannel`) are not supported.
 * It is not possible to use a different JDK to compile the JavaCard applets and run this project.
 * Connection to wireless card terminals may occasionally fail.
+
+Licenses
+--------
+
+JCProfilerNext is licensed under the GNU General Public License v3.0 (GPLv3).
+This project includes components derived from the following third-party project:
+
+. SPA-Cryptographic-Operations-Extractor (https://github.com/crocs-muni/SPA-Cryptographic-Operations-Extractor)
+** License: MIT License
+
+See `THIRD_PARTY_NOTICES.txt` and `LICENSES/` for full details.

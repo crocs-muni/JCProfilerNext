@@ -1,0 +1,32 @@
+This MIT license applies only to code portions derived from the SPA-Cryptographic-Operations-Extractor,
+originally authored by Martin Podhora (https://github.com/crocs-muni/SPA-Cryptographic-Operations-Extractor).
+
+The following files were adapted from SPA-Cryptographic-Operations-Extractor,
+and incorporated into this GPL-3.0 licensed project:
+
+- src/main/java/jcprofiler/profiling/oscilloscope/LowPassFilter.java
+- src/main/java/jcprofiler/profiling/similaritysearch/dataprocessing/DataLoader.java
+- src/main/java/jcprofiler/profiling/similaritysearch/dataprocessing/DataManager.java
+- src/main/java/jcprofiler/profiling/similaritysearch/dataprocessing/DataSaver.java
+- src/main/java/jcprofiler/profiling/similaritysearch/distancemeasure/DistanceMeasure.java
+- src/main/java/jcprofiler/profiling/similaritysearch/distancemeasure/ManhattanDistance.java
+- src/main/java/jcprofiler/profiling/similaritysearch/models/Boundaries.java
+- src/main/java/jcprofiler/profiling/similaritysearch/models/Trace.java
+- src/main/java/jcprofiler/profiling/similaritysearch/multithread/MultiThreadController.java
+- src/main/java/jcprofiler/profiling/similaritysearch/multithread/ProcessDataChunkTask.java
+- src/main/java/jcprofiler/profiling/similaritysearch/strategies/SimilaritySearchStrategy.java
+- src/main/java/jcprofiler/profiling/similaritysearch/strategies/TopNStrategy.java
+- src/main/java/jcprofiler/profiling/similaritysearch/Similarity.java
+- src/main/java/jcprofiler/profiling/similaritysearch/SimilaritySearchController.java
+
+The license text is provided in accordance with the MIT license terms.
+
+---
+
+Copyright 2019 Martin Podhora
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

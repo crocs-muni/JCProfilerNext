@@ -33,6 +33,17 @@ public class Main {
     public static void main(final String[] argv) {
         Configurator.setRootLevel(Level.INFO);
 
+        // show help
+        if (argv.length == 0) {
+            JCommander.newBuilder()
+                    .addObject(new Args())
+                    .programName("JCProfilerNext")
+                    .build()
+                    .usage();
+            printHelpExtras();
+            return;
+        }
+
         // parse commandline arguments
         final Args args = new Args();
         final JCommander jc = JCommander.newBuilder()
@@ -47,7 +58,6 @@ public class Main {
             System.exit(1);
         }
 
-        // show help
         if (args.help) {
             jc.usage();
             printHelpExtras();

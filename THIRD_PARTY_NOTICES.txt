@@ -3,7 +3,11 @@ Third-Party Licenses and Notices
 
 This project includes code derived from the following third-party projects, which are under GPL-compatible licenses (https://www.gnu.org/licenses/license-list.html):
 
-1. . SPA-Cryptographic-Operations-Extractor
+1. SmartLEIA
+   License: BSD 3-Clause License
+   Original Source: https://github.com/cw-leia/smartleia
+
+2. SPA-Cryptographic-Operations-Extractor
    License: MIT License
    Source: https://github.com/crocs-muni/SPA-Cryptographic-Operations-Extractor
 

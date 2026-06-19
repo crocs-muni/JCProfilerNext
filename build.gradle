@@ -43,7 +43,7 @@ dependencies {
     implementation 'com.github.martinpaljak:gptool:20.08.12'
 
     // use the latest JNA release to support Apple Silicon MacBooks
-    implementation 'net.java.dev.jna:jna:5.14.0'
+    implementation 'net.java.dev.jna:jna:5.19.1'
 
     // card connection
     implementation 'com.klinec:javacard-tools:1.0.5'

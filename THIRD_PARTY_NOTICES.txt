@@ -7,7 +7,11 @@ This project includes code derived from the following third-party projects, whic
    License: BSD 3-Clause License
    Original Source: https://github.com/cw-leia/smartleia
 
-2. SPA-Cryptographic-Operations-Extractor
+2. picosdk-java-examples
+   License: ISC License
+   Source: https://github.com/picotech/picosdk-java-examples
+
+3. SPA-Cryptographic-Operations-Extractor
    License: MIT License
    Source: https://github.com/crocs-muni/SPA-Cryptographic-Operations-Extractor
 

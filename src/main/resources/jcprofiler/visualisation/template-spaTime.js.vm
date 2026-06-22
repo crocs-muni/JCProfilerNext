@@ -1,0 +1,293 @@
+## SPDX-FileCopyrightText: 2022 Lukáš Zaoral <x456487@fi.muni.cz>
+## SPDX-License-Identifier: GPL-3.0-only
+
+## @vtlvariable name="apduHeader" type="java.lang.String"
+## @vtlvariable name="filteredMeasurements" type="java.util.Map<java.lang.String, java.util.List<java.lang.Long>>"
+## @vtlvariable name="inputDivision" type="java.lang.String"
+## @vtlvariable name="measureUnit" type="java.lang.String"
+## @vtlvariable name="movingAverages" type="java.util.Map<java.lang.String, java.util.List<java.lang.Double>>"
+
+## include common code
+const heatmapX = [
+    #if( $inputDivision == 'none' )
+    'Avg $measureUnit',
+    #else
+    'Diff $measureUnit',
+    #end
+];
+const heatmapData  = {
+    colorscale: 'RdBu'
+};
+#parse( "template-common.js.vm" )
+
+/*
+ * CONSTANTS
+ */
+
+const filteredMeasurements = #object( $filteredMeasurements );
+
+const movingAverages = #object( $movingAverages );
+
+const scatterCommon = {
+    type: 'scatter',
+    xaxis: 'x3',
+    yaxis: 'y2',
+    name: 'elapsed time',
+    showlegend: true,
+    marker: {
+        color: 'rgb(225, 148, 22)'
+    },
+    hovertemplate: 'Trace: elapsed time<br>Round: %{x}<br>Time: %{y} $measureUnit<extra></extra>'
+};
+
+const layoutCommon = {
+    bargap: 0.2,
+    barmode: 'overlay',
+    height: 700,
+    margin: {
+        l: 60,
+        r: 40,
+        b: 40,
+        t: 40,
+        pad: 5
+    },
+    xaxis1: {
+        anchor: 'y1',
+        title: 'Unreachable'
+    },
+    xaxis2: {
+        anchor: 'y1',
+        // dtick: 1,
+        tickformat: ',d',
+        title: 'Time in $measureUnit'
+    },
+    xaxis3: {
+        anchor: 'y2',
+        domain: [0, 1],
+        tickformat: ',d',
+        title: 'Round'
+    },
+    yaxis1: {
+        anchor: 'x1',
+        domain: [0.55, 1],
+        title: 'Frequency'
+        // type: 'log',
+    },
+    yaxis2: {
+        anchor: 'x3',
+        domain: [0, 0.43],
+        title: 'Time in $measureUnit'
+    }
+};
+
+/*
+ * FUNCTIONS
+ */
+
+// set default heading
+document.getElementById('graphName').innerText = 'Select a line to view its histogram.';
+
+/**
+ * Redraw graph event handler
+ *
+ * @param {Event} evt mouse click event
+ */
+function redrawGraph(evt) {
+    // enable graph help
+    document.getElementById('graphHelp').style.display = 'initial';
+
+    // attribute with trap name is always the first
+    const trapName = evt.currentTarget.classList[0];
+
+    // update highlight of the selected trap
+    selectTraps(trapName);
+
+    // update trap title
+    document.getElementById('graphName').textContent = trapName;
+
+    const filteredVals = filteredMeasurements[trapName];
+    const movingAverage = movingAverages[trapName];
+    const vals = measurements[trapName];
+
+    const traces = [];
+
+    const hasTime = vals.some(e => e !== null);
+    if (hasTime) {
+        // Histograms
+        #if( "$inputDivision" == "none" )
+        traces.push({
+            ...histogramCommon,
+            x: filteredVals,
+            name: 'measurements',
+            meta: ['measurements'],
+            marker: {
+                color: 'rgb(49, 130, 189)',
+                opacity: 0.75
+            }
+        });
+        #else
+        traces.push({
+            ...histogramCommon,
+            x: filteredVals.slice(0, filteredVals.length / 2),
+            name: 'low $inputDivision',
+            meta: ['low $inputDivision'],
+            marker: {
+                color: 'rgb(14,199,0)',
+                opacity: 0.70
+            }
+        }, {
+            ...histogramCommon,
+            x: filteredVals.slice(filteredVals.length / 2),
+            name: 'high $inputDivision',
+            meta: ['high $inputDivision'],
+            marker: {
+                color: 'rgb(185,0,199)',
+                opacity: 0.65
+            }
+        });
+        #end
+
+        traces.push({
+            ...histogramCommon,
+            x: vals.map((e, i) => filteredVals[i] !== null ? null : e),
+            name: 'outliers',
+            meta: ['outliers'],
+            visible: 'legendonly',
+            marker: {
+                color: 'rgb(255, 136, 0)',
+                opacity: 0.75
+            }
+        });
+
+        // Line graph
+
+        // make dots only on line endings
+        const dot_x = [], dot_y = [];
+        for (let i = 0; i < vals.length; i++) {
+            // no value
+            if (vals[i] === null)
+                continue;
+
+            // both neighbouring values are defined or only one is defined on border values
+            if (vals.length > 1 &&
+                (i === 0 || vals[i - 1] !== null) && (i === vals.length - 1 || vals[i + 1] != null))
+                continue;
+
+            dot_x.push(i + 1);
+            dot_y.push(vals[i]);
+        }
+
+        traces.push({
+            ...scatterCommon,
+            x: dot_x,
+            y: dot_y,
+            mode: 'markers',
+            showlegend: false
+        }, {
+            ...scatterCommon,
+            x: [...Array(vals.length + 1).keys()].splice(1),
+            y: vals,
+            mode: 'lines'
+        }, {
+            ...scatterCommon,
+            x: [...Array(vals.length + 1).keys()].splice(1),
+            y: movingAverage,
+            name: 'moving average',
+            marker: {
+                color: 'rgb(166, 56, 64)'
+            },
+            hovertemplate: 'Trace: moving average<br>Round: %{x}<br>Average time: %{y} $measureUnit<extra></extra>'
+        });
+    }
+
+    // bar graph visualising number of unreachable rounds
+    const hasUnreach = vals.includes(null);
+    if (hasUnreach) {
+        const y = vals.filter(e => e === null).length;
+        traces.push({
+            x: [''],
+            y: [y],
+            type: 'bar',
+            xaxis: 'x1',
+            yaxis: 'y1',
+            name: 'unreachable',
+            showlegend: false,
+            marker: {
+                color: 'rgb(255, 0, 0)',
+                opacity: 0.65
+            },
+            hovertemplate: 'Unreachable<br>Count: %{y} (%{y}/' + vals.length + ')<extra></extra>'
+        });
+    }
+
+    // WARNING: Layout and config must be passed directly!  Otherwise, sometimes the graph may fail to load.
+    Plotly.react('plotly', traces, {
+        ...layoutCommon,
+        xaxis1: {
+            ...layoutCommon.xaxis1,
+            domain: [0, hasTime ? 0.45 : 1]
+        },
+        xaxis2: {
+            ...layoutCommon.xaxis2,
+            domain: [hasUnreach ? 0.55 : 0, 1]
+        }
+    }, {...configCommon});
+
+    // set click event handler
+    const plotlyDiv = document.getElementById('plotly');
+
+    // get bin half of the bin size
+    // Unfortunately, the xbins.size key is stored only in the first histogram trace and not in the rest, so we have
+    // to obtain this value in advance.
+    const binSizeHalf = plotlyDiv._fullData[0].xbins.size / 2;
+
+    // replace the event handler
+    plotlyDiv.removeAllListeners('plotly_click');
+    plotlyDiv.on('plotly_click', function (data) {
+        const graph = data.points[0];
+        let msg = '', selectedInputs;
+
+        switch (graph.data.type) {
+            // line graph
+            case 'scatter':
+                selectedInputs = [inputs[graph.x - 1]];
+                msg = 'Round: ' + graph.x + '\n';
+                break;
+            case 'histogram':
+                #if( $inputDivision != "none" )
+                const dividedHigh = graph.data.name.startsWith('high');
+                msg += 'Division: ' + graph.data.name + '\n';
+                #end
+                selectedInputs = graph.pointIndices.map(
+                    e => inputs[#if( $inputDivision != "none" )dividedHigh ? vals.length / 2 + e :#end e]);
+
+                msg += 'Bin: ' + Math.ceil(graph.x - binSizeHalf) + ' to ' + Math.floor(graph.x + binSizeHalf) + '\n';
+                break;
+            case 'bar':
+                selectedInputs = vals.reduce((res, e, i) => {
+                    if (e === null)
+                        res.push(inputs[i]);
+                    return res;
+                }, []);
+                console.assert(selectedInputs.length === graph.y);
+
+                msg = 'Unreachable\n';
+                break;
+            default:
+                return;
+        }
+
+        msg += 'Inputs:\n';
+
+        const sortedInputs = Array.from(new Set(selectedInputs)).sort();
+        sortedInputs.forEach(e => msg += '$apduHeader' + e + '\n');
+
+        alert(msg);
+    });
+}
+
+// Set-up event listeners
+window.addEventListener('load', _ => {
+    document.getElementById('trapSwitch').addEventListener('change', toggleTraps);
+    document.querySelectorAll('.trap').forEach(elem => elem.addEventListener('click', evt => redrawGraph(evt)));
+});

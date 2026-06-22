@@ -1,4 +1,5 @@
 // SPDX-FileCopyrightText: 2022-2026 Lukáš Zaoral <lukaszaoral@outlook.com>
+// SPDX-FileCopyrightText: 2026 Veronika Hanulíková <xhanulik@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-only
 
 package jcprofiler;
@@ -8,6 +9,7 @@ import com.beust.jcommander.UnixStyleUsageFormatter;
 
 import jcprofiler.args.Args;
 import jcprofiler.util.JCProfilerUtil;
+import jcprofiler.util.enums.InputDivision;
 import jcprofiler.util.enums.Mode;
 import jcprofiler.util.enums.Stage;
 
@@ -17,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.jar.JarFile;
 
@@ -142,7 +145,7 @@ public class Main {
      * @param  args                          object with parsed commandline arguments
      * @throws UnsupportedOperationException if the argument validation failed
      */
-    private static void validateArgs(final Args args) {
+    private static void validateArgs(final Args args) throws IOException {
         // this is practically a noop but probably not a deliberate one
         if (args.startFrom.ordinal() > args.stopAfter.ordinal())
             throw new UnsupportedOperationException(String.format(
@@ -158,6 +161,19 @@ public class Main {
             if (args.stopAfter == Stage.visualisation)
                 throw new UnsupportedOperationException(
                         "Visualisation of applet instrumented in custom mode is unsupported!");
+        }
+
+        // validate SPA time mode
+        if (args.mode == Mode.spaTime) {
+            if (args.delimiterFile == null)
+                throw new UnsupportedOperationException("Option --delimiter must be set to CSV file in spaTime mode!");
+            // TODO: Adjust LEIA board to handle installation
+            if (args.startFrom.ordinal() <= Stage.installation.ordinal() && args.stopAfter.ordinal() >= Stage.profiling.ordinal()) {
+                throw new UnsupportedOperationException("Installation and profiling cannot be done together in spaTime mode!");
+            }
+            if (args.patternDistance < -1) {
+                throw new UnsupportedOperationException("Invalid value of distance for delimiter patterns!");
+            }
         }
 
         // validate --data-regex and --data-file
@@ -208,6 +224,6 @@ public class Main {
         if (args.ins == JCProfilerUtil.INS_PERF_HANDLER)
             throw new UnsupportedOperationException(String.format(
                     "Applet instruction byte has the same value as profiler's custom internal instruction: %d%n" +
-                    "This is temporarily unsupported!", Short.toUnsignedInt(JCProfilerUtil.INS_PERF_HANDLER)));
+                            "This is temporarily unsupported!", Short.toUnsignedInt(JCProfilerUtil.INS_PERF_HANDLER)));
     }
 }

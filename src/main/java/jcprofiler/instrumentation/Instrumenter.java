@@ -1,4 +1,5 @@
 // SPDX-FileCopyrightText: 2022-2026 Lukáš Zaoral <lukaszaoral@outlook.com>
+// SPDX-FileCopyrightText: 2025-2026 Veronika Hanulikova <xhanulik@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-only
 
 package jcprofiler.instrumentation;
@@ -79,6 +80,10 @@ public class Instrumenter {
                 spoon.addProcessor(new InsertTimeTrapProcessor(args));
                 spoon.addProcessor(new ModifyTimeEntryPointProcessor(args));
                 break;
+            case spaTime:
+                spoon.addProcessor(new InsertSpaTrapProcessor(args));
+                spoon.addProcessor(new ModifySpaEntryPointProcessor(args));
+                break;
             case custom:
                 spoon.addProcessor(new InsertCustomTrapProcessor(args));
                 spoon.addProcessor(new ModifyCustomEntryPointProcessor(args));
@@ -148,6 +153,7 @@ public class Instrumenter {
         switch (args.mode) {
             case custom:
             case memory:
+            case spaTime:
                 executable = JCProfilerUtil.getProfiledExecutable(model, args.entryPoint, args.executable);
                 break;
             case time:
@@ -205,38 +211,41 @@ public class Instrumenter {
             if (count > 0)
                 throw new UnsupportedOperationException(String.format(
                         "Code contains %d classes named %s! Updating already instrumented sources is unsupported " +
-                        "at the moment!", count, className));
+                                "at the moment!", count, className));
 
             log.debug("Class {} not found.", className);
             try {
                 String actualFilename = null;
                 if (className.equals("PM")) {
                     switch (args.mode) {
-                    case custom:
-                        log.info("Using custom PM class from {}.", args.customPM);
-                        spoon.addInputResource(args.customPM.toString());
-                        continue;
-                    case memory:
-                        actualFilename = args.mode + "/" + className;
+                        case custom:
+                            log.info("Using custom PM class from {}.", args.customPM);
+                            spoon.addInputResource(args.customPM.toString());
+                            continue;
+                        case memory:
+                            actualFilename = args.mode + "/" + className;
 
-                        // support newer JCSystem.getAvailableMemory overloads
-                        final boolean hasNewerAPI =
-                                args.jcSDK.getVersion().ordinal() >= JavaCardSDK.Version.V304.ordinal();
-                        if (hasNewerAPI && args.useSimulator) {
-                            log.warn("jCardSim does not implement JCSystem.getAvailableMemory(short[],short,byte).");
-                            log.info("Falling back to JCSystem.getAvailableMemory(short).");
-                        }
+                            // support newer JCSystem.getAvailableMemory overloads
+                            final boolean hasNewerAPI =
+                                    args.jcSDK.getVersion().ordinal() >= JavaCardSDK.Version.V304.ordinal();
+                            if (hasNewerAPI && args.useSimulator) {
+                                log.warn("jCardSim does not implement JCSystem.getAvailableMemory(short[],short,byte).");
+                                log.info("Falling back to JCSystem.getAvailableMemory(short).");
+                            }
 
-                        final boolean useNewerAPI = hasNewerAPI && !args.useSimulator;
-                        log.info("Using JCSystem.getAvailableMemory with {} B limit.",
-                                useNewerAPI ? Integer.MAX_VALUE : Short.MAX_VALUE);
-                        actualFilename += (useNewerAPI ? "-new" : "-old") + ".java";
-                        break;
-                    case time:
-                        actualFilename = args.mode + "/" + className + ".java";
-                        break;
-                    default:
-                        throw new RuntimeException("Unreachable statement reached!");
+                            final boolean useNewerAPI = hasNewerAPI && !args.useSimulator;
+                            log.info("Using JCSystem.getAvailableMemory with {} B limit.",
+                                    useNewerAPI ? Integer.MAX_VALUE : Short.MAX_VALUE);
+                            actualFilename += (useNewerAPI ? "-new" : "-old") + ".java";
+                            break;
+                        case time:
+                            actualFilename = args.mode + "/" + className + ".java";
+                            break;
+                        case spaTime:
+                            actualFilename = args.mode + "/" + className + ".java";
+                            break;
+                        default:
+                            throw new RuntimeException("Unreachable statement reached!");
                     }
                 }
 
@@ -292,9 +301,9 @@ public class Instrumenter {
                         return false;
                     final CtType<?> cls = ((CtTypeAccess<?>) i.getTarget()).getAccessedType().getDeclaration();
                     return PM.equals(cls) &&
-                           i.getType().equals(i.getFactory().Type().voidPrimitiveType()) &&
-                           i.getExecutable().getSignature().equals("check(short)");
-        });
+                            i.getType().equals(i.getFactory().Type().voidPrimitiveType()) &&
+                            i.getExecutable().getSignature().equals("check(short)");
+                });
         final Set<CtField<?>> trapFields = traps.stream().flatMap(x -> x.getArguments().stream())
                 .map(x -> (CtFieldRead<?>) x).map(CtFieldRead::getVariable).map(CtFieldReference::getDeclaration)
                 .collect(Collectors.toSet());

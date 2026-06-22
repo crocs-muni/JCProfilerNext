@@ -1,4 +1,5 @@
 // SPDX-FileCopyrightText: 2022-2026 Lukáš Zaoral <lukaszaoral@outlook.com>
+// SPDX-FileCopyrightText: 2025-2026 Veronika Hanulikova <xhanulik@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-only
 
 package jcprofiler.args;
@@ -8,6 +9,7 @@ import com.beust.jcommander.Parameter;
 import jcprofiler.args.converters.*;
 import jcprofiler.args.validators.*;
 import jcprofiler.util.enums.*;
+import com.beust.jcommander.converters.DoubleConverter;
 
 import pro.javacard.JavaCardSDK;
 
@@ -96,7 +98,7 @@ public class Args {
     public Path customHandler;
 
     @Parameter(names = {"--repeat-count"},
-               description = "Number of profiling rounds (custom or time profiling only)",
+               description = "Number of profiling rounds (time and spaTime profiling only)",
                validateWith = PositiveIntegerValidator.class)
     public int repeatCount = 1000;
 
@@ -144,4 +146,54 @@ public class Args {
                description = "Time unit to be used in result visualisation (time profiling only)",
                converter = TimeUnitConverter.class)
     public TimeUnit timeUnit = TimeUnit.micro;
+
+    @Parameter(names = {"--trace-dir"},
+            description = "Path to the directory where the SPA traces are saved, if not specify, the traces are not saved",
+            converter = DirectoryPathConverter.class)
+    public Path traceDir = null;
+
+    @Parameter(names = {"--delimiter"},
+            description = "Path to the CSV delimiter file",
+            converter = FilePathConverter.class)
+    public Path delimiterFile;
+
+    @Parameter(names = {"--delimiter-num"},
+            description = "Number of patterns needed to construct the delimiter for SPA trace extraction",
+            validateWith = PositiveIntegerValidator.class)
+    public int delimiterPatternNum = 3;
+
+    @Parameter(names = {"--voltage-threshold"},
+            description = "Value for threshold of the oscilloscope trigger in Volts",
+            converter = DoubleConverter.class)
+    public double voltageThreshold = 1.0;
+
+    @Parameter(names = {"--delay"},
+            description = "How much data to capture before trigger",
+            validateWith = PositiveIntegerValidator.class)
+    public int delay = 0;
+
+    @Parameter(names = {"--auto-trigger"},
+            description = "After how many milliseconds should the trigger be set up automatically",
+            validateWith = PositiveIntegerValidator.class)
+    public int autoTrigger = 5000;
+
+    @Parameter(names = {"--time-interval"},
+            description = "Time interval between samples in nanoseconds",
+            validateWith = PositiveIntegerValidator.class)
+    public int timeInterval = 100;
+
+    @Parameter(names = {"--samples"},
+            description = "How many samples should be collected for SPA mode",
+            validateWith = PositiveIntegerValidator.class)
+    public int numberOfSamples = 2_000_000;
+
+    @Parameter(names = {"--filter"},
+            description = "Apply low pass filter of given frequency (Hz)",
+            validateWith = PositiveIntegerValidator.class)
+    public int cutOffFrequency = 10000;
+
+    @Parameter(names = {"--delimiter-distance"},
+            description = "Maximal time value in-between particular delimiter patterns in nanoseconds",
+            validateWith = PositiveIntegerValidator.class)
+    public int patternDistance = 0;
 }

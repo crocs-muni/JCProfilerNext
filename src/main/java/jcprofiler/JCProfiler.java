@@ -1,4 +1,5 @@
 // SPDX-FileCopyrightText: 2022-2026 Lukáš Zaoral <lukaszaoral@outlook.com>
+// SPDX-FileCopyrightText: 2025-2026 Veronika Hanulikova <xhanulik@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-only
 
 package jcprofiler;
@@ -6,6 +7,7 @@ package jcprofiler;
 import cz.muni.fi.crocs.rcard.client.CardManager;
 
 import jcprofiler.args.Args;
+import jcprofiler.card.Leia.TargetController;
 import jcprofiler.compilation.Compiler;
 import jcprofiler.installation.Installer;
 import jcprofiler.instrumentation.Instrumenter;
@@ -74,6 +76,7 @@ public class JCProfiler {
 
         // Installation
         CardManager cardManager = null;
+        TargetController targetController = null; // TODO: create uniform environment for unified access to target controller (CardManager and LEIA board)
         if (args.startFrom.ordinal() <= Stage.installation.ordinal()) {
             // noop for --simulator
             if (args.useSimulator) {
@@ -91,15 +94,27 @@ public class JCProfiler {
         // Profiling
         if (args.startFrom.ordinal() <= Stage.profiling.ordinal()) {
             // Connect if the installation was skipped or simulator is used
-            if (cardManager == null)
-                // TODO: move connection stuff to a separate class?
+            if (cardManager == null && args.mode != Mode.spaTime) {
                 cardManager = Installer.connect(args, entryPoint);
+            } else if (args.mode == Mode.spaTime) {
+                // Only for direct access through LEIA board driver (not for applet installation)
+                targetController = Installer.connect(args);
+            }
 
             log.info("Profiling started.");
-            final AbstractProfiler profiler = AbstractProfiler.create(args, cardManager, model);
-            profiler.profile();
-            profiler.generateCSV();
+            try {
+                final AbstractProfiler profiler = AbstractProfiler.create(args, cardManager, targetController, model);
+                profiler.profile();
+                profiler.generateCSV();
+            } catch (Exception e) {
+                if (targetController != null)
+                    targetController.close();
+                throw e;
+            }
+
             log.info("Profiling complete.");
+            if (targetController != null)
+                targetController.close();
         }
 
         if (args.stopAfter == Stage.profiling)

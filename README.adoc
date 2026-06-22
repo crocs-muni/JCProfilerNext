@@ -12,6 +12,7 @@ Prerequisites
 -------------
 * Install JDK 8 or newer.
 * Obtain a copy of the JavaCard Development Kit, e.g. from this link:https://github.com/martinpaljak/oracle_javacard_sdks[GitHub archive] maintained by Martin Paljak.
+* *(spaTime mode only)* A LEIA smartcard board, a PicoScope4000 oscilloscope, and the PicoScope4000 native SDK installed on the host.
 
 .Compatibility Matrix
 [cols="^1,^2"]
@@ -43,20 +44,13 @@ Compilation
 
 Execution modes
 ---------------
-The tool can be executed in four different modes (select with `--mode`):
+The tool can be executed in five different modes (select with `--mode`):
 
 * `custom` -- Instrument the applet with user-provided code snippets.  The user has to do the measurements on their own.
 * `memory` -- Measure memory usage.
 * `time` (default) -- Measure elapsed time via exception-based instrumentation using a card reader.
 * `stats` -- Collect API usage statistics.
 * `spa-time` -- Measure elapsed time via power trace analysis using an oscilloscope.
-
-NOTE: The `spa-time` mode uses Simple Power Analysis (SPA) to measure execution
-time by capturing the card's power consumption for the target method as a power trace via
-oscilloscope connected through a LEIA smartcard board. Timing is extracted by
-locating a user-provided delimiter pattern inside each captured trace.
-This mode is currently under development and available in the
-link:https://github.com/crocs-muni/JCProfilerNext/tree/spa-time[`spa-time` branch].
 
 Time Example
 ~~~~~~~~~~~~
@@ -202,6 +196,85 @@ javacard.security,KeyPair,ALG_RSA,1
 javacard.security,KeyPair,genKeyPair(),1
 javacard.security,KeyPair,"KeyPair(byte,short)",1
 ----
+
+SPA Timer Mode
+~~~~~~~~~~~~~~
+The `spa-time` mode uses Simple Power Analysis (SPA) to measure execution
+time by capturing the card's power consumption for the target method as a power trace via
+oscilloscope connected through a LEIA smartcard board. Timing is extracted by
+locating a user-provided delimiter pattern inside each captured trace.
+
+Hardware requirements:
+
+* LEIA smartcard board connected to the host via USB serial port
+* PicoScope4000 oscilloscope with its native SDK installed
+* Card under test inserted into the LEIA board
+
+NOTE: Installation and profiling must be performed as *separate* runs.  In a
+single invocation it is not possible to both install the applet and profile it.
+Run `--stop-after installation` first, then re-run with `--start-from profiling`.
+
+.Additional arguments for `spa-time` mode
+[cols="<2,^1,<4"]
+|===
+| Argument | Default | Description
+
+| `--delimiter`
+| *(required)*
+| Path to a CSV file containing the reference voltage trace segment used to locate measurement windows in each captured trace.
+
+| `--trace-dir`
+| *(none)*
+| Directory where raw captured traces are saved as CSV files.  If omitted, traces are not saved.
+
+| `--delimiter-num`
+| `3`
+| Number of patterns used to construct the delimiter.
+
+| `--voltage-threshold`
+| `1.0`
+| Oscilloscope trigger threshold in Volts.
+
+| `--delay`
+| `0`
+| Number of samples to capture before the trigger.
+
+| `--auto-trigger`
+| `5000`
+| Auto-trigger timeout in milliseconds.
+
+| `--time-interval`
+| `100`
+| Time interval between samples in nanoseconds.
+
+| `--samples`
+| `2000000`
+| Number of samples to collect per capture.
+
+| `--filter`
+| `10000`
+| Low-pass (Butterworth) filter cutoff frequency in Hz.  Set to `0` to disable filtering.
+
+| `--delimiter-distance`
+| `0`
+| Maximum allowed time between consecutive delimiter patterns in nanoseconds.  Set to `-1` for no limit.
+|===
+
+SPA Timer Example
+^^^^^^^^^^^^^^^^^
+Run as two separate steps:
+
+[source,console]
+----
+# Step 1 -- instrument and install
+$ ./gradlew run --args="--work-dir example --jckit jc222_kit --mode spa-time --stop-after installation"
+
+# Step 2 -- profile
+$ ./gradlew run --args="--work-dir example --jckit jc222_kit --mode spa-time --start-from profiling --delimiter delimiter.csv"
+----
+JCProfilerNext will produce the same directory structure as in the time mode.
+The ATR field in `measurements.csv` will contain `LEIA` instead of the card's
+actual ATR.
 
 Limitations
 -----------

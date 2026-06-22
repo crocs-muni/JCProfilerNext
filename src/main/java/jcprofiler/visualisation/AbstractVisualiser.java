@@ -124,6 +124,7 @@ public abstract class AbstractVisualiser {
             case memory:
                 return new MemoryVisualiser(args, model);
             case time:
+            case spaTime:
                 return new TimeVisualiser(args, model);
             default:
                 throw new RuntimeException("Unreachable statement reached!");

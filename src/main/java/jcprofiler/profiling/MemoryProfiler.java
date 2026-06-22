@@ -53,7 +53,7 @@ public class MemoryProfiler extends AbstractProfiler {
      *
      */
     public MemoryProfiler(final Args args, final CardManager cardManager, final CtModel model) {
-        super(args, cardManager, JCProfilerUtil.getProfiledExecutable(model, args.entryPoint, args.executable),
+        super(args, cardManager, null, JCProfilerUtil.getProfiledExecutable(model, args.entryPoint, args.executable),
               /* customInsField */ "INS_PERF_GETMEM");
 
         // get size of measurements

@@ -42,7 +42,7 @@ public class TimeProfiler extends AbstractProfiler {
      * @param model       Spoon model
      */
     public TimeProfiler(final Args args, final CardManager cardManager, final CtModel model) {
-        super(args, cardManager, JCProfilerUtil.getProfiledMethod(model, args.executable),
+        super(args, cardManager, null, JCProfilerUtil.getProfiledMethod(model, args.executable),
               /* customInsField */ "INS_PERF_SETSTOP");
     }
 

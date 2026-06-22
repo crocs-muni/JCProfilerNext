@@ -47,8 +47,16 @@ The tool can be executed in four different modes (select with `--mode`):
 
 * `custom` -- Instrument the applet with user-provided code snippets.  The user has to do the measurements on their own.
 * `memory` -- Measure memory usage.
-* `time` (default) -- Measure elapsed time.
+* `time` (default) -- Measure elapsed time via exception-based instrumentation using a card reader.
 * `stats` -- Collect API usage statistics.
+* `spa-time` -- Measure elapsed time via power trace analysis using an oscilloscope.
+
+NOTE: The `spa-time` mode uses Simple Power Analysis (SPA) to measure execution
+time by capturing the card's power consumption for the target method as a power trace via
+oscilloscope connected through a LEIA smartcard board. Timing is extracted by
+locating a user-provided delimiter pattern inside each captured trace.
+This mode is currently under development and available in the
+link:https://github.com/crocs-muni/JCProfilerNext/tree/spa-time[`spa-time` branch].
 
 Time Example
 ~~~~~~~~~~~~

@@ -27,7 +27,7 @@ public class CustomProfiler extends AbstractProfiler {
      * @param model       Spoon model
      */
     public CustomProfiler(final Args args, final CardManager cardManager, final CtModel model) {
-        super(args, cardManager, JCProfilerUtil.getProfiledExecutable(model, args.entryPoint, args.executable),
+        super(args, cardManager, null, JCProfilerUtil.getProfiledExecutable(model, args.entryPoint, args.executable),
               /* customInsField */ null);
     }
 

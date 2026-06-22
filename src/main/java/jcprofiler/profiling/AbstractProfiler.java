@@ -1,5 +1,6 @@
 // SPDX-FileCopyrightText: 2017-2021 Petr Švenda <petrsgit@gmail.com>
 // SPDX-FileCopyrightText: 2022-2026 Lukáš Zaoral <lukaszaoral@outlook.com>
+// SPDX-FileCopyrightText: 2025-2026 Veronika Hanulikova <xhanulik@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-only
 
 package jcprofiler.profiling;
@@ -10,6 +11,7 @@ import cz.muni.fi.crocs.rcard.client.CardManager;
 import cz.muni.fi.crocs.rcard.client.Util;
 
 import jcprofiler.args.Args;
+import jcprofiler.card.Leia.TargetController;
 import jcprofiler.util.enums.InputDivision;
 import jcprofiler.util.JCProfilerUtil;
 import jcprofiler.util.enums.Mode;
@@ -56,6 +58,7 @@ public abstract class AbstractProfiler {
      * A card connection instance
      */
     protected final CardManager cardManager;
+    protected final TargetController targetController;
     /**
      * Profiled executable
      */
@@ -91,7 +94,14 @@ public abstract class AbstractProfiler {
     /**
      * List of generated inputs
      */
+    final List<Byte> p1Inputs = new ArrayList<>();
+    final List<Byte> p2Inputs = new ArrayList<>();
     protected final List<String> inputs = new ArrayList<>();
+
+    /**
+     * List of APDu sent before measured inputs
+     */
+    protected final List<String> auxInputs = new ArrayList<>();
 
     private String elapsedTime;
 
@@ -108,7 +118,7 @@ public abstract class AbstractProfiler {
      *
      * @throws RuntimeException if the sources were instrumented fo ra different profiling mode
      */
-    protected AbstractProfiler(final Args args, final CardManager cardManager, final CtExecutable<?> executable,
+    protected AbstractProfiler(final Args args, final CardManager cardManager, final TargetController targetController, final CtExecutable<?> executable,
                                final String customInsField) {
         final CtModel model = executable.getFactory().getModel();
         PM = JCProfilerUtil.getToplevelType(model, "PM");
@@ -116,6 +126,7 @@ public abstract class AbstractProfiler {
 
         this.args = args;
         this.cardManager = cardManager;
+        this.targetController = targetController;
 
         // check for profiling mode mismatch
         if (!JCProfilerUtil.entryPointHasField(model, args.entryPoint, customInsField))
@@ -141,7 +152,7 @@ public abstract class AbstractProfiler {
      * @param  model       a Spoon model
      * @return             constructed {@link AbstractProfiler} object
      */
-    public static AbstractProfiler create(final Args args, final CardManager cardManager, final CtModel model) {
+    public static AbstractProfiler create(final Args args, final CardManager cardManager, final TargetController targetController, final CtModel model) {
         switch (args.mode) {
             case custom:
                 return new CustomProfiler(args, cardManager, model);
@@ -149,6 +160,8 @@ public abstract class AbstractProfiler {
                 return new MemoryProfiler(args, cardManager, model);
             case time:
                 return new TimeProfiler(args, cardManager, model);
+            case spaTime:
+                return new SpaTimeProfiler(args, targetController, model);
             default:
                 throw new RuntimeException("Unreachable statement reached!");
         }
@@ -191,7 +204,7 @@ public abstract class AbstractProfiler {
         if (traps.size() != pmTraps.size() || !new HashSet<>(traps).containsAll(pmTraps))
             throw new RuntimeException(String.format(
                     "The profiled method and the PMC class contain different traps!%n" +
-                    "Please, reinstrument the given sources!"));
+                            "Please, reinstrument the given sources!"));
 
         // populate the map
         for (final CtField<Short> f : traps) {
@@ -311,7 +324,12 @@ public abstract class AbstractProfiler {
         log.debug("Resetting applet before measurement.");
 
         CommandAPDU reset = new CommandAPDU(args.cla, args.resetIns, 0, 0);
-        ResponseAPDU response = cardManager.transmit(reset);
+        ResponseAPDU response;
+        if (args.mode != Mode.spaTime) {
+            response = cardManager.transmit(reset);
+        } else {
+            response = targetController.sendAPDU(reset);
+        }
         if (response.getSW() != JCProfilerUtil.SW_NO_ERROR)
             throw new RuntimeException("Resetting the applet failed with SW " + Integer.toHexString(response.getSW()));
     }
@@ -338,7 +356,10 @@ public abstract class AbstractProfiler {
             elapsedTime = DurationFormatUtils.formatDuration(endTimeMillis, "d' days 'HH:mm:ss.SSS");
             log.info("Elapsed time: {}", elapsedTime);
 
-            cardManager.disconnect(true);
+            if (cardManager != null)
+                cardManager.disconnect(true);
+            else
+                targetController.close();
             log.info("Disconnected from card.");
 
             // process unreached traps
@@ -360,8 +381,14 @@ public abstract class AbstractProfiler {
 
     public void generateCSV() {
         // prepare header data
-        final String atr = args.useSimulator ? "jCardSim"
-                                             : Util.bytesToHex(cardManager.getChannel().getCard().getATR().getBytes());
+        final String atr;
+        if (args.useSimulator) {
+            atr = "jCardSim";
+        } else if (args.mode == Mode.spaTime) {
+            atr = "LEIA";
+        } else {
+            atr = Util.bytesToHex(cardManager.getChannel().getCard().getATR().getBytes());
+        }
 
         String apduHeader, dataSource;
         if (measuredDuringInstallation) {
@@ -369,7 +396,7 @@ public abstract class AbstractProfiler {
         } else {
             apduHeader = Util.bytesToHex(new byte[]{args.cla, args.ins, args.p1, args.p2});
             dataSource = args.dataRegex != null ? "regex:" + args.dataRegex
-                                                : "file:" + args.dataFile;
+                    : "file:" + args.dataFile;
         }
 
         if (args.mode == Mode.custom)

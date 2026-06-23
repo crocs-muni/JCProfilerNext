@@ -119,20 +119,18 @@ public class Installer {
     }
 
     /**
-     * Either connects to a physical card or to simulator depending on the
+     * Either connects to a physical card, simulator, or LEIA board depending on the
      * commandline arguments.
      *
      * @param  args       object with commandline arguments
      * @param  entryPoint applet entry point class
-     * @return            {@link CardManager} connection instance
+     * @return            {@link CardTarget} connection instance
      */
-    public static CardManager connect(final Args args, final CtClass<?> entryPoint) {
-        return args.useSimulator ? configureSimulator(args, entryPoint)
-                : connectToCard(/* select */ true);
-    }
-
-    public static TargetController connect(final Args args) {
-        return connectToCard();
+    public static CardTarget connect(final Args args, final CtClass<?> entryPoint) {
+        if (args.mode == Mode.spa_time)
+            return connectToLeiaBoard();
+        return new CardManagerTarget(args.useSimulator ? configureSimulator(args, entryPoint)
+                : connectToCard(/* select */ true));
     }
 
     /**

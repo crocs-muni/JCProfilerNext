@@ -52,7 +52,8 @@ public class SpaTimeProfiler extends AbstractProfiler {
      * @param model       Spoon model
      */
     public SpaTimeProfiler(final Args args, TargetController targetController, final CtModel model) {
-        super(args, null, targetController, JCProfilerUtil.getProfiledMethod(model, args.executable), null);
+        super(args, targetController, JCProfilerUtil.getProfiledMethod(model, args.executable), null);
+        this.target = targetController;
     }
 
     /**
@@ -65,7 +66,7 @@ public class SpaTimeProfiler extends AbstractProfiler {
         int unsuccessfulMeasurements = 0;
         try {
             // prepare target LEIA controller
-            targetController.resetTriggerStrategy();
+            target.resetTriggerStrategy();
 
             // find and prepare oscilloscope
             oscilloscope = AbstractOscilloscope.create(args);
@@ -85,7 +86,7 @@ public class SpaTimeProfiler extends AbstractProfiler {
 
             for (int round = 1; round <= args.repeatCount; round++) {
                 // run multiple APDU before measuring, if specified
-                targetController.resetTriggerStrategy();
+                target.resetTriggerStrategy();
 
                 // get APDU which will be measured
                 final CommandAPDU triggerAPDU = getInputAPDU(round);
@@ -112,7 +113,7 @@ public class SpaTimeProfiler extends AbstractProfiler {
             if (oscilloscope != null)
                 oscilloscope.finish();
             if (target != null)
-                targetController.close();
+                target.close();
             throw new RuntimeException(e);
         }
 
@@ -129,13 +130,13 @@ public class SpaTimeProfiler extends AbstractProfiler {
      */
     private Trace profileSingleStep(CommandAPDU triggerAPDU) throws CardException {
         // set pres-send APDU trigger strategy
-        targetController.setPreSendAPDUTriggerStrategy();
+        target.setPreSendAPDUTriggerStrategy();
 
         // start measuring on oscilloscope
         oscilloscope.startMeasuring();
 
         // send profiled APDU to card
-        ResponseAPDU response = targetController.sendAPDU(triggerAPDU);
+        ResponseAPDU response = target.sendAPDU(triggerAPDU);
 
         // stored measured data into CSV
         Trace trace;

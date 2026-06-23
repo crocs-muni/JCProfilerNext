@@ -260,7 +260,7 @@ public class Installer {
         }
     }
 
-    private static TargetController connectToCard() {
+    private static TargetController connectToLeiaBoard() {
         log.info("Connecting to a LEIA board.");
         final TargetController targetController = new TargetController();
 

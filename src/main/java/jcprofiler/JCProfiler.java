@@ -4,10 +4,8 @@
 
 package jcprofiler;
 
-import cz.muni.fi.crocs.rcard.client.CardManager;
-
 import jcprofiler.args.Args;
-import jcprofiler.card.Leia.TargetController;
+import jcprofiler.card.CardTarget;
 import jcprofiler.compilation.Compiler;
 import jcprofiler.installation.Installer;
 import jcprofiler.instrumentation.Instrumenter;
@@ -75,15 +73,14 @@ public class JCProfiler {
             return;
 
         // Installation
-        CardManager cardManager = null;
-        TargetController targetController = null; // TODO: create uniform environment for unified access to target controller (CardManager and LEIA board)
+        CardTarget cardTarget = null;
         if (args.startFrom.ordinal() <= Stage.installation.ordinal()) {
             // noop for --simulator
             if (args.useSimulator) {
                 log.info("Skipping installation because simulator is used.");
             } else {
                 log.info("Installation started.");
-                cardManager = Installer.installOnCard(args, entryPoint);
+                cardTarget = Installer.installOnCard(args, entryPoint);
                 log.info("Installation complete.");
             }
         }
@@ -94,27 +91,21 @@ public class JCProfiler {
         // Profiling
         if (args.startFrom.ordinal() <= Stage.profiling.ordinal()) {
             // Connect if the installation was skipped or simulator is used
-            if (cardManager == null && args.mode != Mode.spa_time) {
-                cardManager = Installer.connect(args, entryPoint);
-            } else if (args.mode == Mode.spa_time) {
-                // Only for direct access through LEIA board driver (not for applet installation)
-                targetController = Installer.connect(args);
-            }
+            if (cardTarget == null)
+                cardTarget = Installer.connect(args, entryPoint);
 
             log.info("Profiling started.");
+            final CardTarget target = cardTarget;
             try {
-                final AbstractProfiler profiler = AbstractProfiler.create(args, cardManager, targetController, model);
+                final AbstractProfiler profiler = AbstractProfiler.create(args, cardTarget, model);
                 profiler.profile();
                 profiler.generateCSV();
             } catch (Exception e) {
-                if (targetController != null)
-                    targetController.close();
+                target.disconnect();
                 throw e;
             }
 
             log.info("Profiling complete.");
-            if (targetController != null)
-                targetController.close();
         }
 
         if (args.stopAfter == Stage.profiling)

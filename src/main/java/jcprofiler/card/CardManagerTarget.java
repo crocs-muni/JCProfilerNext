@@ -34,7 +34,11 @@ public class CardManagerTarget implements CardTarget {
 
     @Override
     public void disconnect() {
-        cardManager.disconnect(true);
+        try {
+            cardManager.disconnect(true);
+        } catch (CardException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

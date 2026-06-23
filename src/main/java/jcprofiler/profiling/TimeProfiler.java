@@ -4,10 +4,10 @@
 
 package jcprofiler.profiling;
 
-import cz.muni.fi.crocs.rcard.client.CardManager;
 import cz.muni.fi.crocs.rcard.client.Util;
 
 import jcprofiler.args.Args;
+import jcprofiler.card.CardTarget;
 import jcprofiler.util.JCProfilerUtil;
 
 import org.apache.commons.csv.CSVPrinter;
@@ -41,8 +41,8 @@ public class TimeProfiler extends AbstractProfiler {
      * @param cardManager applet connection instance
      * @param model       Spoon model
      */
-    public TimeProfiler(final Args args, final CardManager cardManager, final CtModel model) {
-        super(args, cardManager, null, JCProfilerUtil.getProfiledMethod(model, args.executable),
+    public TimeProfiler(final Args args, final CardTarget cardTarget, final CtModel model) {
+        super(args, cardTarget, JCProfilerUtil.getProfiledMethod(model, args.executable),
               /* customInsField */ "INS_PERF_SETSTOP");
     }
 
@@ -98,7 +98,7 @@ public class TimeProfiler extends AbstractProfiler {
 
         CommandAPDU setTrap = new CommandAPDU(args.cla, JCProfilerUtil.INS_PERF_HANDLER, 0, 0,
                                               Util.shortToByteArray(trapID));
-        ResponseAPDU response = cardManager.transmit(setTrap);
+        ResponseAPDU response = cardTarget.transmit(setTrap);
         if (response.getSW() != JCProfilerUtil.SW_NO_ERROR)
             throw new RuntimeException(String.format(
                     "Setting \"%s\" trap failed with SW %s",
@@ -124,7 +124,7 @@ public class TimeProfiler extends AbstractProfiler {
             // execute target operation
             final String trapName = getTrapName(trapID);
             log.debug("Measuring {}.", trapName);
-            final ResponseAPDU response = cardManager.transmit(triggerAPDU);
+            final ResponseAPDU response = cardTarget.transmit(triggerAPDU);
 
             // SW should be equal to the trap ID
             final int SW = response.getSW();
@@ -142,7 +142,7 @@ public class TimeProfiler extends AbstractProfiler {
             }
 
             // compute the difference
-            currentTransmitDuration = cardManager.getLastTransmitTimeNano();
+            currentTransmitDuration = cardTarget.getLastTransmitTimeNano();
             final long diff = currentTransmitDuration - prevTransmitDuration;
             prevTransmitDuration = currentTransmitDuration;
 

@@ -110,9 +110,9 @@ public class JCProfiler {
             log.info("| Stage 4/5: profiling            |");
             log.info("+---------------------------------+");
             // Connect if the installation was skipped or simulator is used
-            if (cardManager == null && args.mode != Mode.spaTime) {
+            if (cardManager == null && args.mode != Mode.spa_time) {
                 cardManager = Installer.connect(args, entryPoint);
-            } else if (args.mode == Mode.spaTime) {
+            } else if (args.mode == Mode.spa_time) {
                 // Only for direct access through LEIA board driver (not for applet installation)
                 targetController = Installer.connect(args);
             }

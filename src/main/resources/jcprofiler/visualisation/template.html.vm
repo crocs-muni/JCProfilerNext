@@ -135,7 +135,7 @@ $line
         </div>
     </div>
     <script type="application/javascript">
-        #parse( "template-${mode}.js.vm" )
+        #parse( "template-${modeName}.js.vm" )
     </script>
 </body>
 </html>

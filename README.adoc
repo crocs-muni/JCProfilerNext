@@ -27,12 +27,9 @@ Prerequisites
 -------------
 * Install JDK 8 or newer.
 * Obtain a copy of the JavaCard Development Kit, e.g. from this link:https://github.com/martinpaljak/oracle_javacard_sdks[GitHub archive] maintained by Martin Paljak.
-<<<<<<< HEAD
 * [Real card only] The card must have sufficient free EEPROM space for your applet.  The instrumented applet is larger than the original (profiling traps are inserted), so ensure a few extra kilobytes are available.  Use `--simulator` to avoid this requirement entirely.
 * [Real card only] A PC/SC-compatible smart card reader and its drivers must be installed.
-=======
-* *(spaTime mode only)* A LEIA smartcard board, a PicoScope4000 oscilloscope, and the PicoScope4000 native SDK installed on the host.
->>>>>>> 1731697 (doc: Add SPA timer into README)
+* *(spa-time mode only)* A LEIA smartcard board, a PicoScope4000 oscilloscope, and the PicoScope4000 native SDK installed on the host.
 
 .Compatibility Matrix
 [cols="^1,^2"]
@@ -82,7 +79,6 @@ The tool can be executed in five different modes (select with `--mode`):
 * `stats` -- Collect API usage statistics.
 * `spa-time` -- Measure elapsed time via power trace analysis using an oscilloscope.
 
-<<<<<<< HEAD
 NOTE: The `spa-time` mode uses Simple Power Analysis (SPA) to measure execution
 time by capturing the card's power consumption for the target method as a power trace via
 oscilloscope connected through a LEIA smartcard board. Timing is extracted by
@@ -91,9 +87,6 @@ This mode is currently under development and available in the
 link:https://github.com/crocs-muni/JCProfilerNext/tree/spa-time[`spa-time` branch].
 
 Time example
-=======
-Time Example
->>>>>>> 1731697 (doc: Add SPA timer into README)
 ~~~~~~~~~~~~
 Consider the `example` method in the following class.  The outer loop is clearly
 not constant since its iteration count depends on the input value.  On the other

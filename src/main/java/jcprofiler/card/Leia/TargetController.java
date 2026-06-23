@@ -26,12 +26,15 @@ package jcprofiler.card.Leia;
 
 import com.fazecast.jSerialComm.*;
 
+import jcprofiler.card.CardTarget;
+
+import javax.smartcardio.CardException;
 import javax.smartcardio.CommandAPDU;
 import javax.smartcardio.ResponseAPDU;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-public class TargetController {
+public class TargetController implements CardTarget {
     /* Number of bytes for size definition */
     final int RESPONSE_LEN_SIZE = 4;
     final int COMMAND_LEN_SIZE = 4;
@@ -372,5 +375,27 @@ public class TargetController {
             serialPort.closePort();
             serialPort = null;
         }
+    }
+
+    // CardTarget interface
+
+    @Override
+    public ResponseAPDU transmit(final CommandAPDU apdu) throws CardException {
+        return sendAPDU(apdu);
+    }
+
+    @Override
+    public void disconnect() {
+        close();
+    }
+
+    @Override
+    public String getAtr() {
+        return "LEIA";
+    }
+
+    @Override
+    public long getLastTransmitTimeNano() {
+        return 0L;
     }
 }

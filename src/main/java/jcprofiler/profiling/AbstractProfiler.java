@@ -7,11 +7,10 @@ package jcprofiler.profiling;
 
 import com.github.curiousoddman.rgxgen.RgxGen;
 
-import cz.muni.fi.crocs.rcard.client.CardManager;
 import cz.muni.fi.crocs.rcard.client.Util;
 
 import jcprofiler.args.Args;
-import jcprofiler.card.Leia.TargetController;
+import jcprofiler.card.CardTarget;
 import jcprofiler.util.enums.InputDivision;
 import jcprofiler.util.JCProfilerUtil;
 import jcprofiler.util.enums.Mode;
@@ -57,8 +56,7 @@ public abstract class AbstractProfiler {
     /**
      * A card connection instance
      */
-    protected final CardManager cardManager;
-    protected final TargetController targetController;
+    protected final CardTarget cardTarget;
     /**
      * Profiled executable
      */
@@ -118,15 +116,14 @@ public abstract class AbstractProfiler {
      *
      * @throws RuntimeException if the sources were instrumented fo ra different profiling mode
      */
-    protected AbstractProfiler(final Args args, final CardManager cardManager, final TargetController targetController, final CtExecutable<?> executable,
+    protected AbstractProfiler(final Args args, final CardTarget cardTarget, final CtExecutable<?> executable,
                                final String customInsField) {
         final CtModel model = executable.getFactory().getModel();
         PM = JCProfilerUtil.getToplevelType(model, "PM");
         PMC = JCProfilerUtil.getToplevelType(model, "PMC");
 
         this.args = args;
-        this.cardManager = cardManager;
-        this.targetController = targetController;
+        this.cardTarget = cardTarget;
 
         // check for profiling mode mismatch
         if (!JCProfilerUtil.entryPointHasField(model, args.entryPoint, customInsField))
@@ -152,16 +149,16 @@ public abstract class AbstractProfiler {
      * @param  model       a Spoon model
      * @return             constructed {@link AbstractProfiler} object
      */
-    public static AbstractProfiler create(final Args args, final CardManager cardManager, final TargetController targetController, final CtModel model) {
+    public static AbstractProfiler create(final Args args, final CardTarget cardTarget, final CtModel model) {
         switch (args.mode) {
             case custom:
-                return new CustomProfiler(args, cardManager, model);
+                return new CustomProfiler(args, cardTarget, model);
             case memory:
-                return new MemoryProfiler(args, cardManager, model);
+                return new MemoryProfiler(args, cardTarget, model);
             case time:
-                return new TimeProfiler(args, cardManager, model);
+                return new TimeProfiler(args, cardTarget, model);
             case spa_time:
-                return new SpaTimeProfiler(args, targetController, model);
+                return new SpaTimeProfiler(args, (jcprofiler.card.Leia.TargetController) cardTarget, model);
             default:
                 throw new RuntimeException("Unreachable statement reached!");
         }
@@ -324,12 +321,7 @@ public abstract class AbstractProfiler {
         log.debug("Resetting applet before measurement.");
 
         CommandAPDU reset = new CommandAPDU(args.cla, args.resetIns, 0, 0);
-        ResponseAPDU response;
-        if (args.mode != Mode.spa_time) {
-            response = cardManager.transmit(reset);
-        } else {
-            response = targetController.sendAPDU(reset);
-        }
+        ResponseAPDU response = cardTarget.transmit(reset);
         if (response.getSW() != JCProfilerUtil.SW_NO_ERROR)
             throw new RuntimeException("Resetting the applet failed with SW " + Integer.toHexString(response.getSW()));
     }
@@ -356,10 +348,7 @@ public abstract class AbstractProfiler {
             elapsedTime = DurationFormatUtils.formatDuration(endTimeMillis, "d' days 'HH:mm:ss.SSS");
             log.info("Elapsed time: {}", elapsedTime);
 
-            if (cardManager != null)
-                cardManager.disconnect(true);
-            else
-                targetController.close();
+            cardTarget.disconnect();
             log.info("Disconnected from card.");
 
             // process unreached traps
@@ -384,10 +373,8 @@ public abstract class AbstractProfiler {
         final String atr;
         if (args.useSimulator) {
             atr = "jCardSim";
-        } else if (args.mode == Mode.spa_time) {
-            atr = "LEIA";
         } else {
-            atr = Util.bytesToHex(cardManager.getChannel().getCard().getATR().getBytes());
+            atr = cardTarget.getAtr();
         }
 
         String apduHeader, dataSource;

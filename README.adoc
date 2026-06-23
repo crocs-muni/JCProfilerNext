@@ -12,7 +12,7 @@ Prerequisites
 -------------
 * Install JDK 8 or newer.
 * Obtain a copy of the JavaCard Development Kit, e.g. from this link:https://github.com/martinpaljak/oracle_javacard_sdks[GitHub archive] maintained by Martin Paljak.
-* *(spaTime mode only)* A LEIA smartcard board, a PicoScope4000 oscilloscope, and the PicoScope4000 native SDK installed on the host.
+* *(spa-time mode only)* A LEIA smartcard board, a PicoScope4000 oscilloscope, and the PicoScope4000 native SDK installed on the host.
 
 .Compatibility Matrix
 [cols="^1,^2"]

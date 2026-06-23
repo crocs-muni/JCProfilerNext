@@ -12,5 +12,5 @@ public enum Mode {
     memory,
     stats,
     time,
-    spaTime
+    spa_time
 }

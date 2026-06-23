@@ -98,7 +98,7 @@ public class Args {
     public Path customHandler;
 
     @Parameter(names = {"--repeat-count"},
-               description = "Number of profiling rounds (time and spaTime profiling only)",
+               description = "Number of profiling rounds (time and spa-time profiling only)",
                validateWith = PositiveIntegerValidator.class)
     public int repeatCount = 1000;
 

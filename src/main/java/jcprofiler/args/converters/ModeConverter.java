@@ -13,4 +13,9 @@ public class ModeConverter extends EnumConverter<Mode> {
     public ModeConverter(String optionName, Class<Mode> clazz) {
         super(optionName, clazz);
     }
+
+    @Override
+    public Mode convert(String value) {
+        return super.convert(value.replace('-', '_'));
+    }
 }

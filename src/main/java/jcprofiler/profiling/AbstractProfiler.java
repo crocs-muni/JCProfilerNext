@@ -160,7 +160,7 @@ public abstract class AbstractProfiler {
                 return new MemoryProfiler(args, cardManager, model);
             case time:
                 return new TimeProfiler(args, cardManager, model);
-            case spaTime:
+            case spa_time:
                 return new SpaTimeProfiler(args, targetController, model);
             default:
                 throw new RuntimeException("Unreachable statement reached!");
@@ -325,7 +325,7 @@ public abstract class AbstractProfiler {
 
         CommandAPDU reset = new CommandAPDU(args.cla, args.resetIns, 0, 0);
         ResponseAPDU response;
-        if (args.mode != Mode.spaTime) {
+        if (args.mode != Mode.spa_time) {
             response = cardManager.transmit(reset);
         } else {
             response = targetController.sendAPDU(reset);
@@ -384,7 +384,7 @@ public abstract class AbstractProfiler {
         final String atr;
         if (args.useSimulator) {
             atr = "jCardSim";
-        } else if (args.mode == Mode.spaTime) {
+        } else if (args.mode == Mode.spa_time) {
             atr = "LEIA";
         } else {
             atr = Util.bytesToHex(cardManager.getChannel().getCard().getATR().getBytes());

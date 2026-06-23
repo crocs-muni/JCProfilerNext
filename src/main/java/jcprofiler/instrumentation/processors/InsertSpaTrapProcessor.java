@@ -9,7 +9,7 @@ import spoon.reflect.declaration.CtExecutable;
 import spoon.reflect.declaration.CtMethod;
 
 /**
- * Class for performance trap insertion in spaTime mode
+ * Class for performance trap insertion in spa-time mode
  * <br>
  * Applicable to instances of {@link CtExecutable}.
  */

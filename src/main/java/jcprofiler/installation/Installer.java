@@ -7,9 +7,12 @@ package jcprofiler.installation;
 import apdu4j.BIBO;
 import apdu4j.CardBIBO;
 import apdu4j.TerminalManager;
+import jcprofiler.card.CardManagerTarget;
+import jcprofiler.card.CardTarget;
 import jcprofiler.card.Leia.ATR;
 import jcprofiler.card.Leia.ConfigureSmartcardCommand;
 import jcprofiler.card.Leia.TargetController;
+import jcprofiler.util.enums.Mode;
 import pro.javacard.gp.GPTool;
 
 import cz.muni.fi.crocs.rcard.client.CardManager;
@@ -68,13 +71,17 @@ public class Installer {
      *
      * @param  args       object with commandline arguments
      * @param  entryPoint applet entry point class
-     * @return            {@link CardManager} connection instance
+     * @return            {@link CardTarget} connection instance
      *
-     * @throws RuntimeException if the applet could not be installed or selected successfully
+     * @throws RuntimeException              if the applet could not be installed or selected successfully
+     * @throws UnsupportedOperationException if installation is not supported for the selected mode
      */
-    public static CardManager installOnCard(final Args args, final CtClass<?> entryPoint) {
+    public static CardTarget installOnCard(final Args args, final CtClass<?> entryPoint) {
         if (args.useSimulator)
             throw new UnsupportedOperationException("Installation on a simulator is not possible");
+
+        if (args.mode == Mode.spa_time)
+            throw new UnsupportedOperationException("LEIA board does not support installation yet");
 
         // connect to the card
         final CardManager cardManager = connectToCard(/* select */ false);
@@ -108,7 +115,7 @@ public class Installer {
             throw new RuntimeException(e);
         }
 
-        return cardManager;
+        return new CardManagerTarget(cardManager);
     }
 
     /**

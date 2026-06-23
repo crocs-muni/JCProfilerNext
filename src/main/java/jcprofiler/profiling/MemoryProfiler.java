@@ -3,12 +3,12 @@
 
 package jcprofiler.profiling;
 
-import cz.muni.fi.crocs.rcard.client.CardManager;
 import cz.muni.fi.crocs.rcard.client.Util;
 
 import javacard.framework.JCSystem;
 
 import jcprofiler.args.Args;
+import jcprofiler.card.CardTarget;
 import jcprofiler.util.JCProfilerUtil;
 
 import org.apache.commons.csv.CSVPrinter;
@@ -52,8 +52,8 @@ public class MemoryProfiler extends AbstractProfiler {
      *                                       {@link javacard.framework.JCSystem#getAvailableMemory(short[], short, byte)}
      *
      */
-    public MemoryProfiler(final Args args, final CardManager cardManager, final CtModel model) {
-        super(args, cardManager, null, JCProfilerUtil.getProfiledExecutable(model, args.entryPoint, args.executable),
+    public MemoryProfiler(final Args args, final CardTarget cardTarget, final CtModel model) {
+        super(args, cardTarget, JCProfilerUtil.getProfiledExecutable(model, args.entryPoint, args.executable),
               /* customInsField */ "INS_PERF_GETMEM");
 
         // get size of measurements
@@ -116,7 +116,7 @@ public class MemoryProfiler extends AbstractProfiler {
             // get the given part
             final CommandAPDU getMeasurements = new CommandAPDU(
                     args.cla, JCProfilerUtil.INS_PERF_HANDLER, memType, part++);
-            final ResponseAPDU response = cardManager.transmit(getMeasurements);
+            final ResponseAPDU response = cardTarget.transmit(getMeasurements);
             if (response.getSW() != JCProfilerUtil.SW_NO_ERROR)
                 throw new RuntimeException(
                         "Getting memory measurements failed with SW " + Integer.toHexString(response.getSW()));
@@ -177,7 +177,7 @@ public class MemoryProfiler extends AbstractProfiler {
             log.info("APDU: {}", input);
 
             // measure!
-            final ResponseAPDU response = cardManager.transmit(triggerAPDU);
+            final ResponseAPDU response = cardTarget.transmit(triggerAPDU);
             if (response.getSW() != JCProfilerUtil.SW_NO_ERROR)
                 throw new RuntimeException(
                         "Executing the applet failed with SW " + Integer.toHexString(response.getSW()));

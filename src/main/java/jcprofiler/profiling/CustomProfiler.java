@@ -3,9 +3,8 @@
 
 package jcprofiler.profiling;
 
-import cz.muni.fi.crocs.rcard.client.CardManager;
-
 import jcprofiler.args.Args;
+import jcprofiler.card.CardTarget;
 import jcprofiler.util.JCProfilerUtil;
 
 import org.apache.commons.csv.CSVPrinter;
@@ -26,8 +25,8 @@ public class CustomProfiler extends AbstractProfiler {
      * @param cardManager applet connection instance
      * @param model       Spoon model
      */
-    public CustomProfiler(final Args args, final CardManager cardManager, final CtModel model) {
-        super(args, cardManager, null, JCProfilerUtil.getProfiledExecutable(model, args.entryPoint, args.executable),
+    public CustomProfiler(final Args args, final CardTarget cardTarget, final CtModel model) {
+        super(args, cardTarget, JCProfilerUtil.getProfiledExecutable(model, args.entryPoint, args.executable),
               /* customInsField */ null);
     }
 

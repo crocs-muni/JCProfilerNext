@@ -9,6 +9,7 @@ import apdu4j.CardBIBO;
 import apdu4j.TerminalManager;
 import jcprofiler.card.CardManagerTarget;
 import jcprofiler.card.CardTarget;
+import jcprofiler.card.LeiaTarget;
 import jcprofiler.card.Leia.ATR;
 import jcprofiler.card.Leia.ConfigureSmartcardCommand;
 import jcprofiler.card.Leia.TargetController;
@@ -260,7 +261,7 @@ public class Installer {
         }
     }
 
-    private static TargetController connectToLeiaBoard() {
+    private static LeiaTarget connectToLeiaBoard() {
         log.info("Connecting to a LEIA board.");
         final TargetController targetController = new TargetController();
 
@@ -292,7 +293,7 @@ public class Installer {
         ResponseAPDU response = targetController.sendAPDU(cmd);
         if (response.getSW() != JCProfilerUtil.SW_NO_ERROR)
             throw new RuntimeException("Applet could not se selected. SW: " + Integer.toHexString(response.getSW()));
-        return targetController;
+        return new LeiaTarget(targetController);
     }
 
     /**

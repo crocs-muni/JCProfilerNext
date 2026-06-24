@@ -10,9 +10,10 @@ import apdu4j.TerminalManager;
 import jcprofiler.card.CardManagerTarget;
 import jcprofiler.card.CardTarget;
 import jcprofiler.card.LeiaTarget;
-import jcprofiler.card.Leia.ATR;
-import jcprofiler.card.Leia.ConfigureSmartcardCommand;
-import jcprofiler.card.Leia.TargetController;
+import jleia.ATR;
+import jleia.LeiaBIBO;
+import jleia.Protocol;
+import jleia.TargetController;
 import jcprofiler.util.enums.Mode;
 import pro.javacard.gp.GPTool;
 

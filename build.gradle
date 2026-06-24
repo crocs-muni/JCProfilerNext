@@ -5,6 +5,11 @@ plugins {
     id 'idea'
 }
 
+// Path to the jleia thin JAR.
+// Override with: export JLEIA_JAR=/path/to/jleia-0.1.0.jar
+// Switch to a Maven coordinate once the library is published.
+def smartleiaJar = System.getenv('JLEIA_JAR') ?: '../jleia/build/libs/jleia-0.1.0.jar'
+
 // TODO: shadow plugin?
 
 group = 'org.crocs'
@@ -62,6 +67,9 @@ dependencies {
     implementation 'uk.me.berndporr:iirj:1.1'
     implementation 'com.opencsv:opencsv:5.9'
     implementation 'com.fazecast:jSerialComm:[2.0.0,3.0.0)'
+
+    // LEIA board driver — thin JAR resolved via $JLEIA_JAR (see top of this file)
+    implementation files(smartleiaJar)
 
     // unit tests
     testImplementation 'org.junit.jupiter:junit-jupiter:5.12.1'

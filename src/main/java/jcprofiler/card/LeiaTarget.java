@@ -3,7 +3,7 @@
 
 package jcprofiler.card;
 
-import jcprofiler.card.Leia.TargetController;
+import jleia.TargetController;
 
 import javax.smartcardio.CardException;
 import javax.smartcardio.CommandAPDU;
@@ -48,7 +48,7 @@ public class LeiaTarget implements CardTarget {
 
     @Override
     public String getAtr() {
-        return "LEIA";
+        return targetController.getATR().normalized();
     }
 
     @Override

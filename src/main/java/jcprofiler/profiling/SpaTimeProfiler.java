@@ -6,7 +6,7 @@ package jcprofiler.profiling;
 
 import cz.muni.fi.crocs.rcard.client.Util;
 import jcprofiler.args.Args;
-import jcprofiler.card.Leia.TargetController;
+import jcprofiler.card.LeiaTarget;
 import jcprofiler.profiling.oscilloscope.AbstractOscilloscope;
 import jcprofiler.profiling.similaritySearch.SimilaritySearchController;
 import jcprofiler.profiling.similaritySearch.dataprocessing.DataManager;
@@ -43,7 +43,7 @@ public class SpaTimeProfiler extends AbstractProfiler {
 
     AbstractOscilloscope oscilloscope;
 
-    TargetController target;
+    LeiaTarget target;
 
     /**
      * Constructs the {@link SpaTimeProfiler} class.
@@ -51,9 +51,9 @@ public class SpaTimeProfiler extends AbstractProfiler {
      * @param args        object with commandline arguments
      * @param model       Spoon model
      */
-    public SpaTimeProfiler(final Args args, TargetController targetController, final CtModel model) {
-        super(args, targetController, JCProfilerUtil.getProfiledMethod(model, args.executable), null);
-        this.target = targetController;
+    public SpaTimeProfiler(final Args args, LeiaTarget leiaTarget, final CtModel model) {
+        super(args, leiaTarget, JCProfilerUtil.getProfiledMethod(model, args.executable), null);
+        this.target = leiaTarget;
     }
 
     /**
@@ -66,7 +66,7 @@ public class SpaTimeProfiler extends AbstractProfiler {
         int unsuccessfulMeasurements = 0;
         try {
             // prepare target LEIA controller
-            target.resetTriggerStrategy();
+            target.getTargetController().resetTriggerStrategy();
 
             // find and prepare oscilloscope
             oscilloscope = AbstractOscilloscope.create(args);
@@ -86,7 +86,7 @@ public class SpaTimeProfiler extends AbstractProfiler {
 
             for (int round = 1; round <= args.repeatCount; round++) {
                 // run multiple APDU before measuring, if specified
-                target.resetTriggerStrategy();
+                target.getTargetController().resetTriggerStrategy();
 
                 // get APDU which will be measured
                 final CommandAPDU triggerAPDU = getInputAPDU(round);
@@ -113,7 +113,7 @@ public class SpaTimeProfiler extends AbstractProfiler {
             if (oscilloscope != null)
                 oscilloscope.finish();
             if (target != null)
-                target.close();
+                target.disconnect();
             throw new RuntimeException(e);
         }
 
@@ -130,13 +130,13 @@ public class SpaTimeProfiler extends AbstractProfiler {
      */
     private Trace profileSingleStep(CommandAPDU triggerAPDU) throws CardException {
         // set pres-send APDU trigger strategy
-        target.setPreSendAPDUTriggerStrategy();
+        target.getTargetController().setPreSendAPDUTriggerStrategy();
 
         // start measuring on oscilloscope
         oscilloscope.startMeasuring();
 
         // send profiled APDU to card
-        ResponseAPDU response = target.sendAPDU(triggerAPDU);
+        ResponseAPDU response = target.getTargetController().sendAPDU(triggerAPDU);
 
         // stored measured data into CSV
         Trace trace;

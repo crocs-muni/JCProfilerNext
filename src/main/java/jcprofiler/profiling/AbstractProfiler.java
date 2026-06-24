@@ -158,7 +158,7 @@ public abstract class AbstractProfiler {
             case time:
                 return new TimeProfiler(args, cardTarget, model);
             case spa_time:
-                return new SpaTimeProfiler(args, (jcprofiler.card.Leia.TargetController) cardTarget, model);
+                return new SpaTimeProfiler(args, (jcprofiler.card.LeiaTarget) cardTarget, model);
             default:
                 throw new RuntimeException("Unreachable statement reached!");
         }

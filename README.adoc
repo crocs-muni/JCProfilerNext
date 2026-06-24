@@ -289,8 +289,6 @@ Licenses
 JCProfilerNext is licensed under the GNU General Public License v3.0 (GPLv3).
 This project includes components derived from the following third-party project:
 
-. SmartLEIA (https://github.com/cw-leia/smartleia)
-** License: BSD 3-Clause License
 . picosdk-java-examples (https://github.com/picotech/picosdk-java-examples)
 ** License: ISC License
 . SPA-Cryptographic-Operations-Extractor (https://github.com/crocs-muni/SPA-Cryptographic-Operations-Extractor)

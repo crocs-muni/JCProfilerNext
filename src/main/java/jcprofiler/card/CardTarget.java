@@ -9,7 +9,7 @@ import javax.smartcardio.ResponseAPDU;
 
 /**
  * Unified interface for card communication, abstracting over a standard card
- * reader ({@link CardManagerTarget}) and the LEIA board ({@link jcprofiler.card.Leia.TargetController}).
+ * reader ({@link CardManagerTarget}) and the LEIA board ({@link LeiaTarget}).
  */
 public interface CardTarget {
 

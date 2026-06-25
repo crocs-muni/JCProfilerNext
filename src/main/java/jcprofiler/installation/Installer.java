@@ -293,9 +293,9 @@ public class Installer {
         }
         log.info("Successfully connected.");
         log.info("Configuring a card in LEIA board.");
-        targetController.configureSmartcard(ConfigureSmartcardCommand.T.T1, 0, 0, true, true);
+        targetController.configureSmartcard(Protocol.T1, 0, 0, true, true);
         ATR atr = targetController.getATR();
-        log.info("Using protocol T={} and the frequency of the ISO7816 clock {} kHz.", atr.tProtocolCurr, atr.fMaxCurr / 1000);
+        log.info("Using protocol T={} and the frequency of the ISO7816 clock {} kHz.", atr.getProtocol(), atr.getMaxFrequencyHz() / 1000);
 
         if (select) {
             log.info("Selecting profiled applet on card.");

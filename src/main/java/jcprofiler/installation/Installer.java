@@ -82,13 +82,6 @@ public class Installer {
         if (args.useSimulator)
             throw new UnsupportedOperationException("Installation on a simulator is not possible");
 
-        if (args.mode == Mode.spa_time)
-            throw new UnsupportedOperationException("LEIA board does not support installation yet");
-
-        // connect to the card
-        final CardManager cardManager = connectToCard(/* select */ false);
-        final BIBO bibo = CardBIBO.wrap(cardManager.getChannel().getCard());
-
         // get path to CAP package
         final Path capPath = JCProfilerUtil.getAppletOutputDirectory(args.workDir)
                 .resolve(entryPoint.getSimpleName() + ".cap");
@@ -103,6 +96,19 @@ public class Installer {
         if (args.key != null)
             gpArgv = ArrayUtils.insert(gpArgv.length, gpArgv, "--key", Util.bytesToHex(args.key));
 
+        // connect and set up a BIBO channel for GPTool
+        final CardTarget cardTarget;
+        final BIBO bibo;
+        if (args.mode == Mode.spa_time) {
+            final LeiaTarget leiaTarget = connectToLeiaBoard(/* select */ false);
+            cardTarget = leiaTarget;
+            bibo = new LeiaBIBO(leiaTarget.getTargetController());
+        } else {
+            final CardManager cardManager = connectToCard(/* select */ false);
+            cardTarget = new CardManagerTarget(cardManager);
+            bibo = CardBIBO.wrap(cardManager.getChannel().getCard());
+        }
+
         // be very careful to not destroy the card!!!
         log.info("Executing GlobalPlatformPro to install {}.", capPath);
         log.debug("GlobalPlatformPro argv: {}", Arrays.toString(gpArgv));
@@ -111,13 +117,16 @@ public class Installer {
             throw new RuntimeException("GlobalPlatformPro exited with non-zero code: " + ret);
 
         // select the applet
+        log.info("Selecting profiled applet on card.");
         try {
-            selectApplet(cardManager);
+            ResponseAPDU response = cardTarget.transmit(new CommandAPDU(0x00, 0xa4, 0x04, 0x00, APPLET_AID));
+            if (response.getSW() != JCProfilerUtil.SW_NO_ERROR)
+                throw new CardException("Applet could not be selected. SW: " + Integer.toHexString(response.getSW()));
         } catch (CardException e) {
             throw new RuntimeException(e);
         }
 
-        return new CardManagerTarget(cardManager);
+        return cardTarget;
     }
 
     /**
@@ -130,7 +139,7 @@ public class Installer {
      */
     public static CardTarget connect(final Args args, final CtClass<?> entryPoint) {
         if (args.mode == Mode.spa_time)
-            return connectToLeiaBoard();
+            return connectToLeiaBoard(/* select */ true);
         return new CardManagerTarget(args.useSimulator ? configureSimulator(args, entryPoint)
                 : connectToCard(/* select */ true));
     }
@@ -262,7 +271,7 @@ public class Installer {
         }
     }
 
-    private static LeiaTarget connectToLeiaBoard() {
+    private static LeiaTarget connectToLeiaBoard(boolean select) {
         log.info("Connecting to a LEIA board.");
         final TargetController targetController = new TargetController();
 
@@ -288,12 +297,13 @@ public class Installer {
         ATR atr = targetController.getATR();
         log.info("Using protocol T={} and the frequency of the ISO7816 clock {} kHz.", atr.tProtocolCurr, atr.fMaxCurr / 1000);
 
-        // select AID
-        log.info("Selecting profiled applet on card.");
-        CommandAPDU cmd = new CommandAPDU(0x00, 0xa4, 0x04, 0x00, APPLET_AID);
-        ResponseAPDU response = targetController.sendAPDU(cmd);
-        if (response.getSW() != JCProfilerUtil.SW_NO_ERROR)
-            throw new RuntimeException("Applet could not se selected. SW: " + Integer.toHexString(response.getSW()));
+        if (select) {
+            log.info("Selecting profiled applet on card.");
+            CommandAPDU cmd = new CommandAPDU(0x00, 0xa4, 0x04, 0x00, APPLET_AID);
+            ResponseAPDU response = targetController.sendAPDU(cmd);
+            if (response.getSW() != JCProfilerUtil.SW_NO_ERROR)
+                throw new RuntimeException("Applet could not be selected. SW: " + Integer.toHexString(response.getSW()));
+        }
         return new LeiaTarget(targetController);
     }
 

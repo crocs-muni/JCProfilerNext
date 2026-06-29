@@ -12,5 +12,10 @@ public enum Mode {
     memory,
     stats,
     time,
-    spa_time
+    spa_time;
+
+    @Override
+    public String toString() {
+        return name().replace('_', '-');
+    }
 }

@@ -60,12 +60,16 @@ public class TimeProfiler extends AbstractProfiler {
 
             // main profiling loop
             generateInputs(args.repeatCount);
+            final int progressStep = Math.max(1, args.repeatCount / 10);
             for (int round = 1; round <= args.repeatCount; round++) {
                 final CommandAPDU triggerAPDU = getInputAPDU(round);
 
                 final String input = Util.bytesToHex(triggerAPDU.getBytes());
-                log.info("Round: {}/{} APDU: {}", round, args.repeatCount, input);
+                log.debug("Round: {}/{} APDU: {}", round, args.repeatCount, input);
                 profileSingleStep(triggerAPDU);
+
+                if (round % progressStep == 0 || round == args.repeatCount)
+                    log.info("Progress: {}/{} rounds completed.", round, args.repeatCount);
             }
 
             // sanity check

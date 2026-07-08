@@ -28,6 +28,10 @@ public class Args {
                description = "Enable debug messages")
     public boolean debug = false;
 
+    @Parameter(names = {"-t", "--trace"},
+               description = "Enable trace messages (implies --debug; also reveals raw APDU traffic)")
+    public boolean trace = false;
+
     @Parameter(names = {"-w", "--work-dir"},
                description = "Path to the working directory (required)",
                required = true,

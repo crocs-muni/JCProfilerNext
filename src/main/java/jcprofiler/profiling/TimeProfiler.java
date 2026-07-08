@@ -98,7 +98,7 @@ public class TimeProfiler extends AbstractProfiler {
      * @throws RuntimeException if setting the next fatal performance trap failed
      */
     private void setTrap(short trapID) throws CardException {
-        log.debug("Setting next trap to {}.", getTrapName(trapID));
+        log.trace("Setting next trap to {}.", getTrapName(trapID));
 
         CommandAPDU setTrap = new CommandAPDU(args.cla, JCProfilerUtil.INS_PERF_HANDLER, 0, 0,
                                               Util.shortToByteArray(trapID));
@@ -127,7 +127,7 @@ public class TimeProfiler extends AbstractProfiler {
 
             // execute target operation
             final String trapName = getTrapName(trapID);
-            log.debug("Measuring {}.", trapName);
+            log.trace("Measuring {}.", trapName);
             final ResponseAPDU response = cardManager.transmit(triggerAPDU);
 
             // SW should be equal to the trap ID
@@ -141,7 +141,7 @@ public class TimeProfiler extends AbstractProfiler {
                 // we have not reached expected performance trap
                 unreachedTraps.add(trapName);
                 measurements.computeIfAbsent(trapName, k -> new ArrayList<>()).add(null);
-                log.debug("Duration: unreachable");
+                log.trace("Duration: unreachable");
                 continue;
             }
 
@@ -150,7 +150,7 @@ public class TimeProfiler extends AbstractProfiler {
             final long diff = currentTransmitDuration - prevTransmitDuration;
             prevTransmitDuration = currentTransmitDuration;
 
-            log.debug("Duration: {} ns", diff);
+            log.trace("Duration: {} ns", diff);
 
             // store the difference
             measurements.computeIfAbsent(getTrapName(trapID), k -> new ArrayList<>()).add(diff);

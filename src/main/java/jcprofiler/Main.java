@@ -24,6 +24,7 @@ import java.util.jar.JarFile;
  */
 public class Main {
     private static final Logger log = LoggerFactory.getLogger(Main.class);
+    private static final String CARD_MANAGER_LOGGER = "cz.muni.fi.crocs.rcard.client.CardManager";
 
     /**
      * JCProfilerNext's entry point method
@@ -32,6 +33,7 @@ public class Main {
      */
     public static void main(final String[] argv) {
         Configurator.setRootLevel(Level.INFO);
+        Configurator.setLevel(CARD_MANAGER_LOGGER, Level.WARN);
 
         // show help
         if (argv.length == 0) {
@@ -66,7 +68,12 @@ public class Main {
 
         // TODO: add proper versioning info as well
         log.info("Welcome to JCProfilerNext!");
-        if (args.debug) {
+        if (args.trace) {
+            args.debug = true;
+            Configurator.setRootLevel(Level.TRACE);
+            Configurator.setLevel(CARD_MANAGER_LOGGER, Level.TRACE);
+            log.info("LogLevel set to TRACE.");
+        } else if (args.debug) {
             Configurator.setRootLevel(Level.DEBUG);
             log.info("LogLevel set to DEBUG.");
         }

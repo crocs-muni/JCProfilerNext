@@ -92,14 +92,14 @@ public class Instrumenter {
         spoon.addProcessor(new SpoonWorkarounds.FixStaticMethodImportProcessor());
         spoon.addProcessor(new SpoonWorkarounds.FixStaticFieldImportProcessor());
 
-        log.info("Instrumenting existing classes.");
+        log.debug("Instrumenting existing classes.");
         spoon.process();
 
         // save the result
         spoon.getEnvironment().setOutputType(OutputType.CLASSES);
         spoon.setSourceOutputDirectory(outputDir.toFile());
 
-        log.info("Saving instrumented classes.");
+        log.debug("Saving instrumented classes.");
         spoon.prettyprint();
 
         // check that all PMC members are unique
@@ -138,7 +138,7 @@ public class Instrumenter {
      * @param model Spoon model
      */
     private void checkArguments(final CtModel model) {
-        log.info("Validating '--entry-point' and '--executable' arguments.");
+        log.debug("Validating '--entry-point' and '--executable' arguments.");
 
         // validate args.entryPoint
         args.entryPoint = JCProfilerUtil.getEntryPoint(model, args.entryPoint).getQualifiedName();
@@ -168,7 +168,7 @@ public class Instrumenter {
      * @throws UnsupportedOperationException for multipackage projects, for projects using the default package
      */
     private void addMissingClasses(final Launcher spoon) {
-        log.info("Generating additional classes.");
+        log.debug("Generating additional classes.");
 
         // this atrocity seems to be required as Spoon does not allow a module rebuild :(
         final Launcher tmpSpoon = new Launcher();

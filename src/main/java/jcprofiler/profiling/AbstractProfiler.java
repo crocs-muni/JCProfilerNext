@@ -170,7 +170,7 @@ public abstract class AbstractProfiler {
      * @throws RuntimeException if the extraction of traps from profiled executable failed
      */
     private void buildPerfMapping() {
-        log.info("Looking for traps in the {}.", profiledExecutableSignature);
+        log.debug("Looking for traps in the {}.", profiledExecutableSignature);
         final String trapNamePrefix = JCProfilerUtil.getTrapNamePrefix(profiledExecutable);
 
         // get traps form profiledExecutable
@@ -197,7 +197,7 @@ public abstract class AbstractProfiler {
         for (final CtField<Short> f : traps) {
             final CtLiteral<Number> evaluated = f.getDefaultExpression().partiallyEvaluate();
             trapNameMap.put(evaluated.getValue().shortValue(), f.getSimpleName());
-            log.info("Found {}.", f.getSimpleName());
+            log.debug("Found {}.", f.getSimpleName());
         }
     }
 
@@ -218,7 +218,7 @@ public abstract class AbstractProfiler {
 
         // regex
         if (args.dataRegex != null) {
-            log.info("Generating inputs from regular expression {}.", args.dataRegex);
+            log.debug("Generating inputs from regular expression {}.", args.dataRegex);
             final RgxGen rgxGen = RgxGen.parse(args.dataRegex);
 
             for (int i = 0; i < size * 100; i++) {

@@ -66,11 +66,11 @@ public class Main {
 
         // TODO: add proper versioning info as well
         log.info("Welcome to JCProfilerNext!");
-        log.info("Command-line arguments parsed successfully.");
         if (args.debug) {
             Configurator.setRootLevel(Level.DEBUG);
             log.info("LogLevel set to DEBUG.");
         }
+        log.debug("Command-line arguments parsed successfully.");
 
         // log basic info
         log.info("Found JavaCard SDK {} ({})", args.jcSDK.getRelease(), args.jcSDK.getRoot().getAbsolutePath());

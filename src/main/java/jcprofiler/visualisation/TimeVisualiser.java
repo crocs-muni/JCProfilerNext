@@ -57,7 +57,7 @@ public class TimeVisualiser extends AbstractVisualiser {
      * Filters obvious outliers from the input measurements.
      */
     private void filterOutliers() {
-        log.info("Filtering outliers from the loaded measurements.");
+        log.debug("Filtering outliers from the loaded measurements.");
         measurements.forEach((k, v) -> {
             final DescriptiveStatistics ds = new DescriptiveStatistics();
             v.stream().filter(Objects::nonNull).map(Long::doubleValue).forEach(ds::addValue);

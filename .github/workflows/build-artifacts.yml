@@ -1,0 +1,65 @@
+---
+name: Build artifacts
+
+on:
+  push:
+    branches: ['**']
+    tags: ['v*']
+
+jobs:
+  build-jar:
+    name: Build JAR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout JCProfilerNext
+        uses: actions/checkout@v6
+        with:
+          path: JCProfilerNext
+
+      - name: Checkout jleia (LEIA board driver)
+        uses: actions/checkout@v6
+        with:
+          repository: xhanulik/jleia
+          ref: c6dc066f0f5e27179c1ae0ba70ee489a6f444f30
+          path: jleia
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Build jleia (LEIA board driver)
+        working-directory: jleia
+        shell: bash
+        run: |
+          chmod +x gradlew
+          ./gradlew jar
+
+      - name: Determine version
+        id: version
+        shell: bash
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            echo "value=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build JAR
+        working-directory: JCProfilerNext
+        shell: bash
+        run: |
+          VERSION_ARG=()
+          if [[ -n "${{ steps.version.outputs.value }}" ]]; then
+            VERSION_ARG=(-PreleaseVersion="${{ steps.version.outputs.value }}")
+          fi
+          ./gradlew jar "${VERSION_ARG[@]}"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: JCProfilerNext-jar
+          path: JCProfilerNext/build/libs/*.jar

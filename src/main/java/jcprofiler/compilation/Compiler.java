@@ -64,7 +64,14 @@ public class Compiler {
         final DefaultLogger consoleLogger = new DefaultLogger();
         consoleLogger.setErrorPrintStream(System.err);
         consoleLogger.setOutputPrintStream(System.out);
-        consoleLogger.setMessageOutputLevel(args.debug ? Project.MSG_VERBOSE : Project.MSG_INFO);
+        final int messageOutputLevel;
+        if (args.trace)
+            messageOutputLevel = Project.MSG_VERBOSE;
+        else if (args.debug)
+            messageOutputLevel = Project.MSG_INFO;
+        else
+            messageOutputLevel = Project.MSG_WARN;
+        consoleLogger.setMessageOutputLevel(messageOutputLevel);
         project.addBuildListener(consoleLogger);
 
         // create javacard target

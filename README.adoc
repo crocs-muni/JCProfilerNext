@@ -56,13 +56,29 @@ Prerequisites
 |===
 
 
+Installation
+------------
+Prebuilt artifacts are produced by the
+link:https://github.com/crocs-muni/JCProfilerNext/actions/workflows/build-artifacts.yml[`Build artifacts`]
+workflow on every push and for every pushed `v*` tag, and can be downloaded
+from that workflow run's "Artifacts" section. Tagged versions are additionally
+published on the
+link:https://github.com/crocs-muni/JCProfilerNext/releases[GitHub Releases page].
+
+* `JCProfilerNext-<version>.jar` -- a self-contained JAR that runs on both
+  Linux and Windows. Requires a JDK matching your target JavaCard SDK version
+  to be installed (see the Compatibility Matrix above); run with
+  `java -jar JCProfilerNext-<version>.jar --help`. Since you provide the JDK
+  yourself, you can pick whichever version matches the JavaCard SDK you are
+  targeting (e.g. JDK 8 for JavaCard 2.2.1, JDK 9-11 for JavaCard 3.0.1+).
+
 Compilation
 -----------
 . Clone this repository.
 . Run `./gradlew build` on Unix-like systems or `gradlew.bat build` on Windows.
 . Execute
 .. directly using Gradle: `./gradlew run --args='--help'`.
-.. directly using built JAR: `java -jar build/libs/JCProfilerNext-1.0-SNAPSHOT.jar --help`.
+.. directly using built JAR: `java -jar build/libs/JCProfilerNext-<version>.jar --help`.
 .. directly from distribution archives in `build/distributions`.
 .. as a standalone binary (recommended): run `./gradlew installDist`, then use
    `build/install/JCProfilerNext/bin/JCProfilerNext` (Unix) or

@@ -39,12 +39,12 @@ public class Args {
     public Path workDir;
 
     @Parameter(names = {"--start-from"},
-               description = "Start from executing the given stage(default: instrumentation)",
+               description = "Start from executing the given stage",
                converter = StageConverter.class)
     public Stage startFrom = Stage.instrumentation;
 
     @Parameter(names = {"--stop-after"},
-               description = "Stop after executing the given stage (default: visualisation)",
+               description = "Stop after executing the given stage",
                converter = StageConverter.class)
     public Stage stopAfter = Stage.visualisation;
 
@@ -81,7 +81,7 @@ public class Args {
     public byte[] installParams;
 
     @Parameter(names = {"--mode"},
-               description = "Measure the selected characteristic (default: time)",
+               description = "Measure the selected characteristic",
                converter = ModeConverter.class)
     public Mode mode = Mode.time;
 
@@ -101,32 +101,37 @@ public class Args {
     public Path customHandler;
 
     @Parameter(names = {"--repeat-count"},
-               description = "Number of profiling rounds (custom or time profiling only) (default: 1000)",
+               description = "Number of profiling rounds (custom or time profiling only)",
                validateWith = PositiveIntegerValidator.class)
     public int repeatCount = 1000;
 
     @Parameter(names = {"--reset-ins"},
                description = "Applet reset instruction in hex",
+               defaultValueDescription = "0x00",
                converter = ByteConverter.class)
     public Byte resetIns;
 
     @Parameter(names = {"--cla"},
-               description = "Applet CLA in hex (default: 0x00)",
+               description = "Applet CLA in hex",
+               defaultValueDescription = "0x00",
                converter = ByteConverter.class)
     public byte cla = 0;
 
     @Parameter(names = {"--ins"},
-               description = "Applet instruction in hex (default: 0x00)",
+               description = "Applet instruction in hex",
+               defaultValueDescription = "0x00",
                converter = ByteConverter.class)
     public byte ins = 0;
 
     @Parameter(names = {"--p1"},
-               description = "Applet P1 in hex (default: 0x00)",
+               description = "Applet P1 in hex",
+               defaultValueDescription = "0x00",
                converter = ByteConverter.class)
     public byte p1 = 0;
 
     @Parameter(names = {"--p2"},
-               description = "Applet P2 in hex (default: 0x00)",
+               description = "Applet P2 in hex",
+               defaultValueDescription = "0x00",
                converter = ByteConverter.class)
     public byte p2 = 0;
 
@@ -141,12 +146,12 @@ public class Args {
     public Path dataFile;
 
     @Parameter(names = {"--input-division"},
-               description = "Divide generated inputs into two categories based on given characteristic (default: none)",
+               description = "Divide generated inputs into two categories based on given characteristic",
                converter = InputDivisionConverter.class)
     public InputDivision inputDivision = InputDivision.none;
 
     @Parameter(names = {"--time-unit"},
-               description = "Time unit to be used in result visualisation (time profiling only) (default: micro)",
+               description = "Time unit to be used in result visualisation (time profiling only)",
                converter = TimeUnitConverter.class)
     public TimeUnit timeUnit = TimeUnit.micro;
 }

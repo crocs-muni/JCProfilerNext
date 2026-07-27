@@ -4,6 +4,7 @@
 package jcprofiler;
 
 import com.beust.jcommander.JCommander;
+import com.beust.jcommander.UnixStyleUsageFormatter;
 
 import jcprofiler.args.Args;
 import jcprofiler.util.JCProfilerUtil;
@@ -35,23 +36,20 @@ public class Main {
         Configurator.setRootLevel(Level.INFO);
         Configurator.setLevel(CARD_MANAGER_LOGGER, Level.WARN);
 
-        // show help
-        if (argv.length == 0) {
-            JCommander.newBuilder()
-                    .addObject(new Args())
-                    .programName("JCProfilerNext")
-                    .build()
-                    .usage();
-            printHelpExtras();
-            return;
-        }
-
         // parse commandline arguments
         final Args args = new Args();
         final JCommander jc = JCommander.newBuilder()
                 .addObject(args)
                 .programName("JCProfilerNext")
                 .build();
+        jc.setUsageFormatter(new UnixStyleUsageFormatter(jc));
+
+        // show help
+        if (argv.length == 0) {
+            jc.usage();
+            printHelpExtras();
+            return;
+        }
 
         try {
             jc.parse(argv);

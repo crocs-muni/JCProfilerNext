@@ -14,7 +14,7 @@ Why profiling?
 * *Performance optimisation* -- identify slow operations and decide whether to move them to native JavaCard commands.
 * *Hardware validation* -- confirm that your applet behaves identically on the real card and in the simulator before deployment.
 
-What You Get
+What you get
 ~~~~~~~~~~~~
 After a successful run, JCProfilerNext produces:
 
@@ -85,7 +85,7 @@ locating a user-provided delimiter pattern inside each captured trace.
 This mode is currently under development and available in the
 link:https://github.com/crocs-muni/JCProfilerNext/tree/spa-time[`spa-time` branch].
 
-Time Example
+Time example
 ~~~~~~~~~~~~
 Consider the `example` method in the following class.  The outer loop is clearly
 not constant since its iteration count depends on the input value.  On the other
@@ -155,7 +155,7 @@ produced by JCProfilerNext, you will see that some parts of the code are indeed
 not constant, namely if you inspect the corresponding histograms of traps
 after the `for` loops.
 
-Memory Example
+Memory example
 ~~~~~~~~~~~~~~
 Consider the following source code:
 
@@ -199,7 +199,7 @@ deselect memory may also affect the amount of free transient memory and vice ver
 See link:https://crocs-muni.github.io/JCProfilerNext/example-memory.html[`measurements.html`]
 for visualisation of the measurements.
 
-Stats Example
+Stats example
 ~~~~~~~~~~~~~
 Consider the following source code:
 

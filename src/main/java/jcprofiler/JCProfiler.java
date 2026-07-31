@@ -59,8 +59,8 @@ public class JCProfiler {
 
         // get entry point class (needed from compilation to profiling)
         final CtClass<?> entryPoint = args.startFrom != Stage.visualisation
-                                            ? JCProfilerUtil.getEntryPoint(model, args.entryPoint)
-                                            : null;
+                ? JCProfilerUtil.getEntryPoint(model, args.entryPoint)
+                : null;
 
         // Compilation
         if (args.startFrom.ordinal() <= Stage.compilation.ordinal()) {
@@ -112,5 +112,16 @@ public class JCProfiler {
         vis.generateHTML();
         vis.insertMeasurementsToSources();
         log.info("Visualising results complete.");
+
+        // Deletion
+        if (args.delete) {
+            if (args.useSimulator) {
+                log.info("Skipping deletion because simulator is used.");
+            } else {
+                log.info("Deletion started.");
+                Installer.uninstallFromCard(args);
+                log.info("Deletion complete.");
+            }
+        }
     }
 }

@@ -108,6 +108,59 @@ public class Installer {
     }
 
     /**
+     * Deletes the profiled applet from a selected card, after user confirmation.
+     *
+     * @param args object with commandline arguments
+     *
+     * @throws RuntimeException if the applet could not be deleted successfully
+     */
+    public static void uninstallFromCard(final Args args) {
+        if (args.useSimulator)
+            throw new UnsupportedOperationException("Deletion from a simulator is not possible");
+
+        if (!confirmDeletion()) {
+            log.info("Deletion cancelled by user.");
+            return;
+        }
+
+        // connect to the card
+        final CardManager cardManager = connectToCard(/* select */ false);
+        final BIBO bibo = CardBIBO.wrap(cardManager.getChannel().getCard());
+
+        // construct argv for GPTool
+        // NOTE: --force only affects deletion of a *package* AID's dependents (see GPTool.java);
+        // it has no effect when deleting a single applet instance AID like ours, so it's omitted here.
+        String[] gpArgv = new String[]{"--verbose", "--delete", Util.bytesToHex(APPLET_AID)};
+        if (args.debug)
+            gpArgv = ArrayUtils.add(gpArgv, "--debug");
+        if (args.key != null)
+            gpArgv = ArrayUtils.insert(gpArgv.length, gpArgv, "--key", Util.bytesToHex(args.key));
+
+        // be very careful to not destroy the wrong applet!!!
+        log.info("Executing GlobalPlatformPro to delete applet with AID {}.", Util.bytesToHex(APPLET_AID));
+        log.debug("GlobalPlatformPro argv: {}", Arrays.toString(gpArgv));
+        int ret = new GPTool().run(bibo, gpArgv);
+        if (ret != 0)
+            throw new RuntimeException("GlobalPlatformPro exited with non-zero code: " + ret);
+
+        // GPTool intentionally suppresses errors on --delete (behaves like `rm`),
+        // so a zero exit code does not guarantee the AID was actually present/removed.
+        log.info("Deletion command completed. Verify manually if the AID was not previously present.");
+    }
+
+    /**
+     * Prompts the user on stdin to confirm applet deletion.
+     *
+     * @return true if the user confirmed, false otherwise
+     */
+    private static boolean confirmDeletion() {
+        System.out.printf("Delete applet with AID %s from the card? [y/N]: ", Util.bytesToHex(APPLET_AID));
+        final Scanner in = new Scanner(System.in);
+        final String answer = in.nextLine().trim();
+        return answer.equalsIgnoreCase("y") || answer.equalsIgnoreCase("yes");
+    }
+
+    /**
      * Either connects to a physical card or to simulator depending on the
      * commandline arguments.
      *
@@ -117,7 +170,7 @@ public class Installer {
      */
     public static CardManager connect(final Args args, final CtClass<?> entryPoint) {
         return args.useSimulator ? configureSimulator(args, entryPoint)
-                                 : connectToCard(/* select */ true);
+                : connectToCard(/* select */ true);
     }
 
     /**
@@ -138,7 +191,7 @@ public class Installer {
 
         // get path to JAR archive
         final Path jarPath = JCProfilerUtil.getAppletOutputDirectory(args.workDir)
-                        .resolve(entryPoint.getPackage().getSimpleName() + ".jar");
+                .resolve(entryPoint.getPackage().getSimpleName() + ".jar");
         JCProfilerUtil.checkFile(jarPath, Stage.compilation);
         final CardManager cardManager = new CardManager(/* logging */ true, APPLET_AID);
 

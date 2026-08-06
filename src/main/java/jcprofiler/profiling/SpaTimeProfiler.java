@@ -112,8 +112,6 @@ public class SpaTimeProfiler extends AbstractProfiler {
         } catch (CardException | InterruptedException | IOException e) {
             if (oscilloscope != null)
                 oscilloscope.finish();
-            if (target != null)
-                target.disconnect();
             throw new RuntimeException(e);
         }
 

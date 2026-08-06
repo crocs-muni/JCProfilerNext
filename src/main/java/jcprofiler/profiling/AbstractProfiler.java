@@ -348,9 +348,6 @@ public abstract class AbstractProfiler {
             elapsedTime = DurationFormatUtils.formatDuration(endTimeMillis, "d' days 'HH:mm:ss.SSS");
             log.info("Elapsed time: {}", elapsedTime);
 
-            cardTarget.disconnect();
-            log.info("Disconnected from card.");
-
             // process unreached traps
             if (!unreachedTraps.isEmpty()) {
                 log.warn("Some traps were not always reached:");

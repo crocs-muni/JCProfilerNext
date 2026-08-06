@@ -123,6 +123,8 @@ public class JCProfiler {
             }
 
             log.info("Profiling complete.");
+            target.disconnect();
+            log.info("Disconnected from card.");
         }
 
         if (args.stopAfter == Stage.profiling)

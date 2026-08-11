@@ -10,6 +10,7 @@ import jcprofiler.card.LeiaTarget;
 import jcprofiler.profiling.oscilloscope.AbstractOscilloscope;
 import jcprofiler.profiling.similaritySearch.SimilaritySearchController;
 import jcprofiler.profiling.similaritySearch.dataprocessing.DataManager;
+import jcprofiler.profiling.similaritySearch.gui.DelimiterCutterDialog;
 import jcprofiler.profiling.similaritySearch.models.Boundaries;
 import jcprofiler.profiling.similaritySearch.models.Trace;
 import jcprofiler.profiling.similaritySearch.Similarity;
@@ -82,8 +83,18 @@ public class SpaTimeProfiler extends AbstractProfiler {
             generateInputs(args.repeatCount);
 
             // load delimiter trace
-            delimiterTrace = DataManager.loadTrace(args.delimiterFile.toAbsolutePath().toString(), true);
-
+            if (args.delimiterFile != null) {
+                delimiterTrace = DataManager.loadTrace(args.delimiterFile.toAbsolutePath().toString(), true);
+            } else {
+                // automatic calibration
+                target.getTargetController().setPreSendAPDUTriggerStrategy();
+                oscilloscope.startMeasuring();
+                CommandAPDU delimAPDU =  getInputAPDU(1); // Use first APDU input for calibration
+                ResponseAPDU response = target.getTargetController().sendAPDU(delimAPDU);
+                Trace trace = oscilloscope.getTrace(args.cutOffFrequency);
+                log.info("Automatic calibration trace captured. Opening window for manual delimiter selection.");
+                delimiterTrace = DelimiterCutterDialog.selectDelimiter(trace);
+            }
             for (int round = 1; round <= args.repeatCount; round++) {
                 // run multiple APDU before measuring, if specified
                 target.getTargetController().resetTriggerStrategy();

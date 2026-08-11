@@ -68,6 +68,9 @@ dependencies {
     implementation 'com.opencsv:opencsv:5.9'
     implementation 'com.fazecast:jSerialComm:[2.0.0,3.0.0)'
 
+    // manual delimiter selection UI
+    implementation 'jfree:jfreechart:1.0.13'
+
     // LEIA board driver — thin JAR resolved via $JLEIA_JAR (see top of this file)
     implementation files(smartleiaJar)
 

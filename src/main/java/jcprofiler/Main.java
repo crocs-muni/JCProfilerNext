@@ -165,12 +165,6 @@ public class Main {
 
         // validate SPA time mode
         if (args.mode == Mode.spa_time) {
-            if (args.delimiterFile == null)
-                throw new UnsupportedOperationException("Option --delimiter must be set to CSV file in spa-time mode!");
-            // TODO: Adjust LEIA board to handle installation
-            if (args.startFrom.ordinal() <= Stage.installation.ordinal() && args.stopAfter.ordinal() >= Stage.profiling.ordinal()) {
-                throw new UnsupportedOperationException("Installation and profiling cannot be done together in spa-time mode!");
-            }
             if (args.patternDistance < -1) {
                 throw new UnsupportedOperationException("Invalid value of distance for delimiter patterns!");
             }

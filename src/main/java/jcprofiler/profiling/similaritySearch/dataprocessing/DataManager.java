@@ -74,4 +74,28 @@ public class DataManager {
     public static void saveTrace(String filePath, Trace trace, int firstIndex, int lastIndex) throws IOException {
         DataSaver.exportToCsv(trace, filePath, firstIndex, lastIndex);
     }
+
+    /**
+     * Builds a new in-memory {@link Trace} restricted to the given index range [firstIndex, lastIndex),
+     * with voltage min/max recomputed over just that range.
+     *
+     * @param trace      source trace
+     * @param firstIndex first index of the range (inclusive)
+     * @param lastIndex  last index of the range (exclusive)
+     * @return a new trace containing only the selected range
+     */
+    public static Trace sliceTrace(Trace trace, int firstIndex, int lastIndex) {
+        int length = lastIndex - firstIndex;
+        double[] voltage = new double[length];
+        double[] time = new double[length];
+        double maximum = Double.NEGATIVE_INFINITY;
+        double minimum = Double.POSITIVE_INFINITY;
+        for (int i = 0; i < length; i++) {
+            voltage[i] = trace.getVoltageOnPosition(firstIndex + i);
+            time[i] = trace.getTimeOnPosition(firstIndex + i);
+            if (voltage[i] > maximum) maximum = voltage[i];
+            if (voltage[i] < minimum) minimum = voltage[i];
+        }
+        return new Trace(trace.getVoltageUnit(), trace.getTimeUnit(), length, voltage, time, maximum, minimum);
+    }
 }

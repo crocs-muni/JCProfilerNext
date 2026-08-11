@@ -30,6 +30,10 @@ Prerequisites
 * [Real card only] The card must have sufficient free EEPROM space for your applet.  The instrumented applet is larger than the original (profiling traps are inserted), so ensure a few extra kilobytes are available.  Use `--simulator` to avoid this requirement entirely.
 * [Real card only] A PC/SC-compatible smart card reader and its drivers must be installed.
 * *(spa-time mode only)* A LEIA smartcard board, a PicoScope4000 oscilloscope, and the PicoScope4000 native SDK installed on the host.
+* *(spa-time mode only)* The `jleia` thin JAR, which provides the LEIA board driver and is not published to any Maven repository:
+.. Clone and build link:https://github.com/xhanulik/jleia[xhanulik/jleia] (e.g. `./gradlew build`), which produces `build/libs/jleia-0.1.0.jar`.
+.. By default, JCProfilerNext's `build.gradle` expects this JAR at `../jleia/build/libs/jleia-0.1.0.jar` (i.e. `jleia` checked out as a sibling directory of `JCProfilerNext`).
+.. To use a different location, set the `JLEIA_JAR` environment variable to the JAR's path before building, e.g. `export JLEIA_JAR=/path/to/jleia-0.1.0.jar`.
 
 .Compatibility Matrix
 [cols="^1,^2"]
@@ -247,10 +251,6 @@ Hardware requirements:
 * PicoScope4000 oscilloscope with its native SDK installed
 * Card under test inserted into the LEIA board
 
-NOTE: Installation and profiling must be performed as *separate* runs.  In a
-single invocation it is not possible to both install the applet and profile it.
-Run `--stop-after installation` first, then re-run with `--start-from profiling`.
-
 .Additional arguments for `spa-time` mode
 [cols="<2,^1,<4"]
 |===
@@ -299,19 +299,21 @@ Run `--stop-after installation` first, then re-run with `--start-from profiling`
 
 SPA Timer Example
 ^^^^^^^^^^^^^^^^^
-Run as two separate steps:
+Run as:
 
 [source,console]
 ----
-# Step 1 -- instrument and install
-$ ./gradlew run --args="--work-dir example --jckit jc222_kit --mode spa-time --stop-after installation"
-
-# Step 2 -- profile
-$ ./gradlew run --args="--work-dir example --jckit jc222_kit --mode spa-time --start-from profiling --delimiter delimiter.csv"
+$ ./gradlew run --args="--work-dir example --jckit jc222_kit --mode spa-time --delimiter delimiter.csv"
 ----
 JCProfilerNext will produce the same directory structure as in the time mode.
 The ATR field in `measurements.csv` will contain `LEIA` instead of the card's
 actual ATR.
+
+The `delimiter.csv` is the raw trace file containing the delimiter pattern.
+The delimiter pattern can be manually extracted from some CSV file with traces with the
+link:https://github.com/xhanulik/SPA-Cryptographic-Operations-Extractor/tree/general-extractor[general trace knife].
+
+NOTE: Automatic delimiter calibration without need to manually cut the trace is under development.
 
 FAQ
 ---

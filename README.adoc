@@ -257,7 +257,7 @@ Hardware requirements:
 | Argument | Default | Description
 
 | `--delimiter`
-| *(required)*
+| *(none)*
 | Path to a CSV file containing the reference voltage trace segment used to locate measurement windows in each captured trace.
 
 | `--trace-dir`
@@ -310,8 +310,7 @@ The ATR field in `measurements.csv` will contain `LEIA` instead of the card's
 actual ATR.
 
 The `delimiter.csv` is the raw trace file containing the delimiter pattern.
-The delimiter pattern can be manually extracted from some CSV file with traces with the
-link:https://github.com/xhanulik/SPA-Cryptographic-Operations-Extractor/tree/general-extractor[general trace knife].
+The delimiter pattern can be manually extracted from callibration trace when run without `--delimiter` set.
 
 NOTE: Automatic delimiter calibration without need to manually cut the trace is under development.
 

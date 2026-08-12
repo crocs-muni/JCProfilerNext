@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Veronika Hanulikova <hanulikova@mail.muni.cz>
+// SPDX-FileCopyrightText: 2026 Veronika Hanulikova <xhanulik@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-only
 
 package jcprofiler.profiling.similaritySearch.models;
@@ -7,8 +7,6 @@ package jcprofiler.profiling.similaritySearch.models;
  * Holds the state needed to let a user manually select a start/end region
  * on a trace's chart: the trace being viewed, and the currently selected
  * first/last indices.
- *
- * @author Veronika Hanulikova
  */
 public class TraceSelection {
     private final Trace trace;

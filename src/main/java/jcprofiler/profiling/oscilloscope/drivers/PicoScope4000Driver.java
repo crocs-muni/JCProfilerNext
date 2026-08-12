@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2025 Veronika Hanulikova <xhanulik@gmail.com>
+// SPDX-FileCopyrightText: 2025-2026 Veronika Hanulikova <xhanulik@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-only
 
 package jcprofiler.profiling.oscilloscope.drivers;

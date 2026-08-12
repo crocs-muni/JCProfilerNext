@@ -51,7 +51,10 @@ jobs:
 
       - name: Build jleia (LEIA board driver)
         working-directory: jleia
-        run: ./gradlew jar
+        shell: bash
+        run: |
+          chmod +x gradlew
+          ./gradlew jar
 
       - name: Execute Gradle build
         working-directory: JCProfilerNext

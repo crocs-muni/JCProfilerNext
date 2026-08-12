@@ -27,7 +27,18 @@ jobs:
             name: Windows
 
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout JCProfilerNext
+        uses: actions/checkout@v6
+        with:
+          path: JCProfilerNext
+
+      # Thin JAR driver for the LEIA board; not published to any Maven repository,
+      # so it must be built from source. See src/main/java/jcprofiler/card/README.md.
+      - name: Checkout jleia (LEIA board driver)
+        uses: actions/checkout@v6
+        with:
+          repository: xhanulik/jleia
+          path: jleia
 
       - name: Set up JDK ${{ matrix.jdk }}
         uses: actions/setup-java@v5
@@ -38,14 +49,22 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
 
+      - name: Build jleia (LEIA board driver)
+        working-directory: jleia
+        run: ./gradlew jar
+
       - name: Execute Gradle build
+        working-directory: JCProfilerNext
         run: ./gradlew build
 
       - name: Execute profiling tests (stats)
+        working-directory: JCProfilerNext
         run: python3 tests/gather-stats.py
 
       - name: Execute profiling tests (memory)
+        working-directory: JCProfilerNext
         run: python3 tests/run.py --mode memory --ci
 
       - name: Execute profiling tests (time)
+        working-directory: JCProfilerNext
         run: python3 tests/run.py --mode time --ci

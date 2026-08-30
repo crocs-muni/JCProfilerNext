@@ -56,7 +56,7 @@ dependencies {
     implementation 'org.apache.commons:commons-text:1.15.0'
 
     // velocity
-    implementation 'org.apache.velocity:velocity-engine-core:2.3'
+    implementation 'org.apache.velocity:velocity-engine-core:2.4.1'
 
     // unit tests
     testImplementation 'org.junit.jupiter:junit-jupiter:5.12.1'

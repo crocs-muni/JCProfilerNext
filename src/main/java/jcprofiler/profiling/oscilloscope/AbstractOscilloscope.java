@@ -15,7 +15,6 @@ public abstract class AbstractOscilloscope {
 
     // setup parameters
     protected double voltageThreshold;
-    protected double thresholdVoltageRange;
     protected short delay;
     protected short autoTriggerMs;
     protected int wantedTimeIntervalNs;
@@ -32,7 +31,6 @@ public abstract class AbstractOscilloscope {
 
     public AbstractOscilloscope(Args args) {
         this.voltageThreshold = args.voltageThreshold;
-        this.thresholdVoltageRange = 2 * voltageThreshold;
         this.delay = (short) args.delay;
         this.autoTriggerMs = (short) args.autoTrigger;
         this.wantedTimeIntervalNs = args.timeInterval;

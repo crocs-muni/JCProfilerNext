@@ -21,9 +21,13 @@ public class PicoScope4000Driver extends AbstractOscilloscope {
     short handle = 0;
     String deviceName;
     private final short channel = (short) PicoScope4000Library.PicoScope4000Channel.PS4000_CHANNEL_A.ordinal();
-    private final short channelRange = (short) PicoScope4000Library.PicoScope4000Range.PS4000_500MV.ordinal();
+    private final PicoScope4000Library.PicoScope4000Range channelRangeEnum = PicoScope4000Library.PicoScope4000Range.PS4000_500MV;
+    private final short channelRange = (short) channelRangeEnum.ordinal();
+    private final double channelVoltageRange = channelRangeEnum.getVoltage();
     private final short triggerChannel = (short) PicoScope4000Library.PicoScope4000Channel.PS4000_CHANNEL_B.ordinal();
-    private final short triggerChannelRange = (short) PicoScope4000Library.PicoScope4000Range.PS4000_1V.ordinal();
+    private final PicoScope4000Library.PicoScope4000Range triggerChannelRangeEnum;
+    private final short triggerChannelRange;
+    private final double triggerVoltageRange;
     short direction = (short) PicoScope4000Library.PicoScope4000ThresholdDirection.RISING.ordinal();
     int timebase = 0;
     int timeInterval = 0; //ns
@@ -31,6 +35,25 @@ public class PicoScope4000Driver extends AbstractOscilloscope {
 
     public PicoScope4000Driver(Args args) {
         super(args);
+        // Pick the smallest range that leaves the requested threshold strictly
+        // inside it: PicoScope rejects a trigger threshold sitting at or beyond
+        // the edge of the configured channel range (PICO_INVALID_PARAMETER).
+        triggerChannelRangeEnum = selectTriggerRange(voltageThreshold);
+        triggerChannelRange = (short) triggerChannelRangeEnum.ordinal();
+        triggerVoltageRange = triggerChannelRangeEnum.getVoltage();
+    }
+
+    private static PicoScope4000Library.PicoScope4000Range selectTriggerRange(double voltageThreshold) {
+        // margin so the threshold does not sit exactly on the range's edge
+        final double requiredRange = voltageThreshold * 1.1;
+        for (final PicoScope4000Library.PicoScope4000Range range : PicoScope4000Library.PicoScope4000Range.values()) {
+            if (range == PicoScope4000Library.PicoScope4000Range.PS4000_MAX_RANGES)
+                break;
+            if (range.getVoltage() >= requiredRange)
+                return range;
+        }
+        throw new IllegalArgumentException(
+                "Requested --voltage-threshold " + voltageThreshold + " V exceeds the oscilloscope's maximum range");
     }
 
     @Override
@@ -84,7 +107,7 @@ public class PicoScope4000Driver extends AbstractOscilloscope {
     }
 
     private void setTrigger() {
-        short threshold = (short) volt2Adc(voltageThreshold, thresholdVoltageRange, maxAdcValue);
+        short threshold = (short) volt2Adc(voltageThreshold, triggerVoltageRange, maxAdcValue);
         int status;
         try {
             status = PicoScope4000Library.INSTANCE.ps4000SetSimpleTrigger(handle, (short) 1, triggerChannel, threshold, direction, delay, autoTriggerMs);
@@ -212,7 +235,7 @@ public class PicoScope4000Driver extends AbstractOscilloscope {
             buffer.read(0, adcValues, 0, adcValues.length);
         }
         // convert into volt values
-        return adc2Volt(adcValues, maxAdcValue, thresholdVoltageRange);
+        return adc2Volt(adcValues, maxAdcValue, channelVoltageRange);
     }
 
     @Override

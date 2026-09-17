@@ -58,20 +58,27 @@ public interface PicoScope4000Library extends Library {
     }
 
     public enum PicoScope4000Range {
-        PS4000_10MV,
-        PS4000_20MV,
-        PS4000_50MV,
-        PS4000_100MV,
-        PS4000_200MV,
-        PS4000_500MV,
-        PS4000_1V,
-        PS4000_2V,
-        PS4000_5V,
-        PS4000_10V,
-        PS4000_20V,
-        PS4000_50V,
-        PS4000_100V,
-        PS4000_MAX_RANGES
+        PS4000_10MV(0.01),
+        PS4000_20MV(0.02),
+        PS4000_50MV(0.05),
+        PS4000_100MV(0.1),
+        PS4000_200MV(0.2),
+        PS4000_500MV(0.5),
+        PS4000_1V(1.0),
+        PS4000_2V(2.0),
+        PS4000_5V(5.0),
+        PS4000_10V(10.0),
+        PS4000_20V(20.0),
+        PS4000_50V(50.0),
+        PS4000_100V(100.0),
+        PS4000_MAX_RANGES(0.0);
+        private final double voltage;
+        PicoScope4000Range(double voltage) {
+            this.voltage = voltage;
+        }
+        public double getVoltage() {
+            return voltage;
+        }
     }
 
     enum PicoScope4000ThresholdDirection

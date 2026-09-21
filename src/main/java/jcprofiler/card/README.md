@@ -23,7 +23,7 @@ stores it as `protected final CardTarget cardTarget`.  Profilers call only
 ```java
 ResponseAPDU transmit(CommandAPDU apdu) throws CardException;
 void         disconnect();
-String       getAtr();                 // hex ATR string identifying the connected card
+String       getAtr();                 // hex ATR string of the physical card (real card, even via LEIA)
 long         getLastTransmitTimeNano(); // board-measured round-trip; 0 if unsupported
 ```
 

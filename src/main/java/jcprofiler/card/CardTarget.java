@@ -30,7 +30,8 @@ public interface CardTarget {
 
     /**
      * Returns a string identifying the connected card.
-     * For a physical card reader this is the hex-encoded ATR; for the LEIA board it is {@code "LEIA"}.
+     * This is the hex-encoded ATR of the physical card, whether reached through
+     * a standard card reader or through the LEIA board.
      *
      * @return ATR string
      */

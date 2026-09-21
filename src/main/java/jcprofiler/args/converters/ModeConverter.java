@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 /**
  * Parameter converter for the {@link Mode} enum.
- * Accepts hyphenated input (e.g. {@code spa-time}) in addition to the enum constant names.
+ * Accepts hyphenated input only {@code spa-time}.
  */
 public class ModeConverter implements IStringConverter<Mode> {
     private final String optionName;

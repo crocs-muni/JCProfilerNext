@@ -165,6 +165,11 @@ public class Main {
 
         // validate SPA time mode
         if (args.mode == Mode.spa_time) {
+            if (args.useSimulator)
+                throw new UnsupportedOperationException(
+                        "Option --simulator is not supported in spa-time mode! " +
+                        "spa-time profiling requires a real card connected via the LEIA board.");
+
             if (args.patternDistance < -1) {
                 throw new UnsupportedOperationException("Invalid value of distance for delimiter patterns!");
             }

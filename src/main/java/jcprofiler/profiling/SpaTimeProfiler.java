@@ -91,6 +91,10 @@ public class SpaTimeProfiler extends AbstractProfiler {
                 Trace trace = oscilloscope.getTrace(args.cutOffFrequency);
                 log.info("Automatic calibration trace captured. Opening window for manual delimiter selection.");
                 delimiterTrace = DelimiterCutterDialog.selectDelimiter(trace);
+
+                // the calibration APDU above mutated applet state; reset it so that
+                // round 1 starts from the same reset state as all later rounds
+                resetApplet();
             }
             for (int round = 1; round <= args.repeatCount; round++) {
                 // run multiple APDU before measuring, if specified

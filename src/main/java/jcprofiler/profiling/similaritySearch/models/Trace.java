@@ -29,8 +29,6 @@ import java.math.RoundingMode;
  * @author Martin Podhora
  */
 public class Trace {
-    private static final int TIME_UNIT_CONSTANT = 1000;
-
     private final double[] voltageArray;
 
     private final double[] timeArray;
@@ -188,6 +186,30 @@ public class Trace {
     }
 
     /**
+     * Returns how many instances of the given time unit make up one second,
+     * so that a time delta expressed in that unit can be converted to seconds.
+     *
+     * @param  timeUnit                 unit of time, e.g. "ns", "ms" or "s"
+     * @return                          number of such units per second
+     * @throws IllegalArgumentException if the unit is not recognised
+     */
+    private static BigDecimal unitsPerSecond(String timeUnit) {
+        switch (timeUnit) {
+            case "ns":
+                return new BigDecimal("1000000000");
+            case "us":
+            case "μs":
+                return new BigDecimal("1000000");
+            case "ms":
+                return new BigDecimal("1000");
+            case "s":
+                return BigDecimal.ONE;
+            default:
+                throw new IllegalArgumentException("Unsupported time unit: " + timeUnit);
+        }
+    }
+
+    /**
      * Sampling frequency getter.
      *
      * @return sampling frequency
@@ -201,7 +223,7 @@ public class Trace {
                         .abs()
                         .setScale(10, RoundingMode.HALF_UP))
                 .abs()
-                .divide(new BigDecimal(TIME_UNIT_CONSTANT), 10, RoundingMode.HALF_UP);
+                .divide(unitsPerSecond(timeUnit), 10, RoundingMode.HALF_UP);
         dT = BigDecimal.ONE.divide(dT, 10, RoundingMode.HALF_UP);
         return dT.intValue();
     }

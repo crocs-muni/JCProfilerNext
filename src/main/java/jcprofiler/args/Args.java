@@ -198,12 +198,12 @@ public class Args {
     public int numberOfSamples = 2_000_000;
 
     @Parameter(names = {"--filter"},
-            description = "Apply low pass filter of given frequency (Hz)",
-            validateWith = PositiveIntegerValidator.class)
+            description = "Apply low pass filter of given frequency (Hz), 0 disables filtering",
+            validateWith = NonNegativeIntegerValidator.class)
     public int cutOffFrequency = 10000;
 
     @Parameter(names = {"--delimiter-distance"},
-            description = "Maximal time value in-between particular delimiter patterns in nanoseconds",
-            validateWith = PositiveIntegerValidator.class)
+            description = "Maximal time value in-between particular delimiter patterns in nanoseconds, 0 means unlimited",
+            validateWith = NonNegativeIntegerValidator.class)
     public int patternDistance = 0;
 }

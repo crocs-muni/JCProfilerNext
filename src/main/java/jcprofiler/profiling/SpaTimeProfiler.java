@@ -96,6 +96,7 @@ public class SpaTimeProfiler extends AbstractProfiler {
                 // round 1 starts from the same reset state as all later rounds
                 resetApplet();
             }
+            final int progressStep = Math.max(1, args.repeatCount / 10);
             for (int round = 1; round <= args.repeatCount; round++) {
                 // run multiple APDU before measuring, if specified
                 target.getTargetController().resetTriggerStrategy();
@@ -103,7 +104,7 @@ public class SpaTimeProfiler extends AbstractProfiler {
                 // get APDU which will be measured
                 final CommandAPDU triggerAPDU = getInputAPDU(round);
                 final String input = Util.bytesToHex(triggerAPDU.getBytes());
-                log.info("Round: {}/{} APDU: {}", round, args.repeatCount, input);
+                log.debug("Round: {}/{} APDU: {}", round, args.repeatCount, input);
 
                 // run operation and oscilloscope measuring
                 Trace trace = profileSingleStep(triggerAPDU);
@@ -114,9 +115,12 @@ public class SpaTimeProfiler extends AbstractProfiler {
                     for (short trapID : trapNameMap.keySet()) {
                         measurements.computeIfAbsent(getTrapName(trapID), k -> new ArrayList<>()).add(0L);
                     }
-                    log.info("Measurements not saved");
+                    log.warn("Measurements not saved for round {}.", round);
                     unsuccessfulMeasurements++;
                 }
+
+                if (round % progressStep == 0 || round == args.repeatCount)
+                    log.info("Progress: {}/{} rounds completed.", round, args.repeatCount);
             }
         } catch (CardException | InterruptedException | IOException e) {
             throw new RuntimeException(e);
@@ -244,7 +248,7 @@ public class SpaTimeProfiler extends AbstractProfiler {
 
                 // store time for given trapID
                 short trapID = getTrapID(numberOfSubtrace);
-                log.debug("Trap ID {} duration: {} ns", trapID, elapsedTime);
+                log.trace("Trap ID {} duration: {} ns", trapID, elapsedTime);
                 measurements.computeIfAbsent(getTrapName(trapID), k -> new ArrayList<>()).add(elapsedTime);
 
                 // save CSV for subtrace
@@ -257,7 +261,7 @@ public class SpaTimeProfiler extends AbstractProfiler {
                     log.debug("Subtrace {} saved.", currentSubtracePath.getFileName());
                 }
             } else {
-                log.debug("Time in-between delimiter patterns: {} ns", elapsedTime);
+                log.trace("Time in-between delimiter patterns: {} ns", elapsedTime);
                 if (args.patternDistance > 0 && elapsedTime > args.patternDistance) {
                     log.error("Unexpected time between delimiter patterns (expected max {}, found {})", args.patternDistance, elapsedTime);
                     log.error("Skipping trace");
@@ -265,7 +269,7 @@ public class SpaTimeProfiler extends AbstractProfiler {
                 }
             }
         }
-        log.info("Trace extraction finished successfully");
+        log.debug("Trace extraction finished successfully.");
         return 0;
     }
 

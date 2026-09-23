@@ -37,17 +37,24 @@ public class JCProfiler {
      */
     public static void run(final Args args) {
         if (args.mode == Mode.stats) {
-            log.info("Collecting API usage statistics.");
+            log.info("");
+            log.info("+---------------------------------+");
+            log.info("| Stage 1/1: stats                |");
+            log.info("+---------------------------------+");
             new Instrumenter(args).generateStatistics();
-            log.info("Collecting complete.");
+            log.info("");
+            log.info("Done. Results written to: {}", args.workDir.toAbsolutePath());
+            log.info("  APIstatistics.csv -- API usage frequency table");
             return;
         }
 
         // Instrumentation
         if (args.startFrom.ordinal() <= Stage.instrumentation.ordinal()) {
-            log.info("Instrumentation started.");
+            log.info("");
+            log.info("+---------------------------------+");
+            log.info("| Stage 1/5: instrumentation      |");
+            log.info("+---------------------------------+");
             JCProfilerUtil.moveToSubDirIfNotExists(args.workDir, JCProfilerUtil.getSourceInputDirectory(args.workDir));
-
             new Instrumenter(args).process();
             log.info("Instrumentation complete.");
         }
@@ -64,7 +71,10 @@ public class JCProfiler {
 
         // Compilation
         if (args.startFrom.ordinal() <= Stage.compilation.ordinal()) {
-            log.info("Compilation started.");
+            log.info("");
+            log.info("+---------------------------------+");
+            log.info("| Stage 2/5: compilation          |");
+            log.info("+---------------------------------+");
             Compiler.compile(args, entryPoint);
             log.info("Compilation complete.");
         }
@@ -75,11 +85,13 @@ public class JCProfiler {
         // Installation
         CardManager cardManager = null;
         if (args.startFrom.ordinal() <= Stage.installation.ordinal()) {
-            // noop for --simulator
+            log.info("");
+            log.info("+---------------------------------+");
+            log.info("| Stage 3/5: installation         |");
+            log.info("+---------------------------------+");
             if (args.useSimulator) {
-                log.info("Skipping installation because simulator is used.");
+                log.info("Skipping installation (simulator mode).");
             } else {
-                log.info("Installation started.");
                 cardManager = Installer.installOnCard(args, entryPoint);
                 log.info("Installation complete.");
             }
@@ -90,12 +102,15 @@ public class JCProfiler {
 
         // Profiling
         if (args.startFrom.ordinal() <= Stage.profiling.ordinal()) {
+            log.info("");
+            log.info("+---------------------------------+");
+            log.info("| Stage 4/5: profiling            |");
+            log.info("+---------------------------------+");
             // Connect if the installation was skipped or simulator is used
             if (cardManager == null)
                 // TODO: move connection stuff to a separate class?
                 cardManager = Installer.connect(args, entryPoint);
 
-            log.info("Profiling started.");
             final AbstractProfiler profiler = AbstractProfiler.create(args, cardManager, model);
             profiler.profile();
             profiler.generateCSV();
@@ -106,11 +121,20 @@ public class JCProfiler {
             return;
 
         // Visualisation
-        log.info("Visualising results.");
+        log.info("");
+        log.info("+---------------------------------+");
+        log.info("| Stage 5/5: visualisation        |");
+        log.info("+---------------------------------+");
         final AbstractVisualiser vis = AbstractVisualiser.create(args, model);
         vis.loadAndProcessMeasurements();
         vis.generateHTML();
         vis.insertMeasurementsToSources();
-        log.info("Visualising results complete.");
+        log.info("Visualisation complete.");
+
+        log.info("");
+        log.info("Done. Results written to: {}", args.workDir.toAbsolutePath());
+        log.info("  measurements.csv  -- raw per-trap measurements");
+        log.info("  measurements.html -- interactive visualisation");
+        log.info("  sources_perf/     -- sources annotated with inline measurements");
     }
 }

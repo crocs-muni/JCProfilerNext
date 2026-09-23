@@ -671,7 +671,7 @@ public class JCProfilerUtil {
      * @return      a {@link SpoonAPI} instance
      */
     public static SpoonAPI getInstrumentedSpoon(final Args args) {
-        log.info("Validating Spoon model.");
+        log.debug("Validating Spoon model.");
 
         final Launcher spoon = new Launcher();
         setupSpoon(spoon, args);

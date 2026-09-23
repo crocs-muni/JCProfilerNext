@@ -131,7 +131,7 @@ public class Installer {
      *                          could not be  selected successfully
      */
     private static CardManager configureSimulator(final Args args, final CtClass<?> entryPoint) {
-        log.info("Configuring jCardSim simulator.");
+        log.debug("Configuring jCardSim simulator.");
 
         // assure jCardSim compatibility with newer bouncycastle
         System.setProperty("com.licel.jcardsim.bouncycastle.rsa.allow_unsafe_mod", "true");

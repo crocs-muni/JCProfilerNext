@@ -23,7 +23,7 @@ repositories {
 
 dependencies {
     // commandline arguments parsing
-    implementation 'com.beust:jcommander:1.82'
+    implementation 'org.jcommander:jcommander:1.85' // last version that supports Java 8
 
     // Spoon
     implementation 'fr.inria.gforge.spoon:spoon-core:9.1.0' // last version that supports Java 8

@@ -4,6 +4,7 @@
 package jcprofiler;
 
 import com.beust.jcommander.JCommander;
+import com.beust.jcommander.UnixStyleUsageFormatter;
 
 import jcprofiler.args.Args;
 import jcprofiler.util.JCProfilerUtil;
@@ -24,6 +25,7 @@ import java.util.jar.JarFile;
  */
 public class Main {
     private static final Logger log = LoggerFactory.getLogger(Main.class);
+    private static final String CARD_MANAGER_LOGGER = "cz.muni.fi.crocs.rcard.client.CardManager";
 
     /**
      * JCProfilerNext's entry point method
@@ -32,6 +34,7 @@ public class Main {
      */
     public static void main(final String[] argv) {
         Configurator.setRootLevel(Level.INFO);
+        Configurator.setLevel(CARD_MANAGER_LOGGER, Level.WARN);
 
         // parse commandline arguments
         final Args args = new Args();
@@ -39,6 +42,14 @@ public class Main {
                 .addObject(args)
                 .programName("JCProfilerNext")
                 .build();
+        jc.setUsageFormatter(new UnixStyleUsageFormatter(jc));
+
+        // show help
+        if (argv.length == 0) {
+            jc.usage();
+            printHelpExtras();
+            return;
+        }
 
         try {
             jc.parse(argv);
@@ -47,19 +58,24 @@ public class Main {
             System.exit(1);
         }
 
-        // show help
         if (args.help) {
             jc.usage();
+            printHelpExtras();
             return;
         }
 
         // TODO: add proper versioning info as well
         log.info("Welcome to JCProfilerNext!");
-        log.info("Command-line arguments parsed successfully.");
-        if (args.debug) {
+        if (args.trace) {
+            args.debug = true;
+            Configurator.setRootLevel(Level.TRACE);
+            Configurator.setLevel(CARD_MANAGER_LOGGER, Level.TRACE);
+            log.info("LogLevel set to TRACE.");
+        } else if (args.debug) {
             Configurator.setRootLevel(Level.DEBUG);
             log.info("LogLevel set to DEBUG.");
         }
+        log.debug("Command-line arguments parsed successfully.");
 
         // log basic info
         log.info("Found JavaCard SDK {} ({})", args.jcSDK.getRelease(), args.jcSDK.getRoot().getAbsolutePath());
@@ -80,6 +96,44 @@ public class Main {
             log.error("Caught exception!", e);
             System.exit(1);
         }
+    }
+
+    private static void printHelpExtras() {
+        System.out.println();
+        System.out.println("ARGUMENT STRUCTURE");
+        System.out.println("  Required arguments for a profiling run: --work-dir and --jckit.");
+        System.out.println("  --entry-point expects a fully-qualified class name: package.ClassName");
+        System.out.println("  --executable  expects an unqualified method name:   myMethod");
+        System.out.println("  Hex values (--cla, --ins, --p1, --p2, --reset-ins) accept either a plain");
+        System.out.println("  hex number (e.g. EE) or a 0x-prefixed value (e.g. 0xEE).");
+        System.out.println("  Either --data-regex or --data-file must be provided when profiling a method");
+        System.out.println("  (not needed for memory profiling of the constructor or stats mode).");
+        System.out.println();
+        System.out.println("EXAMPLES");
+        System.out.println();
+        System.out.println("  # Profile a specific method (time mode, real card):");
+        System.out.println("  JCProfilerNext --work-dir path/to/applet --jckit path/to/jc304_kit \\");
+        System.out.println("                 --entry-point com.example.MyApplet --executable myMethod \\");
+        System.out.println("                 --repeat-count 100 --data-regex \"[0-9A-F]{64}\" --mode time");
+        System.out.println();
+        System.out.println("  # Profile a method using the simulator, no entry-point needed (single applet):");
+        System.out.println("  JCProfilerNext --work-dir path/to/applet --jckit path/to/jc222_kit \\");
+        System.out.println("                 --executable myMethod --ins 0xEE \\");
+        System.out.println("                 --data-regex 00[0-9A-F]{2} --simulator");
+        System.out.println();
+        System.out.println("  # Measure memory usage during constructor (no --executable needed):");
+        System.out.println("  JCProfilerNext --work-dir path/to/applet --jckit path/to/jc304_kit --mode memory");
+        System.out.println();
+        System.out.println("  # Collect API usage statistics:");
+        System.out.println("  JCProfilerNext --work-dir path/to/applet --jckit path/to/jc222_kit --mode stats");
+        System.out.println();
+        System.out.println("  # Run only instrumentation and compilation, skip installation/profiling:");
+        System.out.println("  JCProfilerNext --work-dir path/to/applet --jckit path/to/jc222_kit \\");
+        System.out.println("                 --stop-after compilation");
+        System.out.println();
+        System.out.println("REPORTING BUGS");
+        System.out.println("  If you encounter an unexpected error, re-run with --debug, save the output,");
+        System.out.println("  and open an issue at https://github.com/crocs-muni/JCProfilerNext");
     }
 
     /**

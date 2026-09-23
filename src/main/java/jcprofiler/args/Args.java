@@ -28,8 +28,12 @@ public class Args {
                description = "Enable debug messages")
     public boolean debug = false;
 
+    @Parameter(names = {"-t", "--trace"},
+               description = "Enable trace messages (implies --debug; also reveals raw APDU traffic)")
+    public boolean trace = false;
+
     @Parameter(names = {"-w", "--work-dir"},
-               description = "Path to the working directory",
+               description = "Path to the working directory (required)",
                required = true,
                converter = DirectoryPathConverter.class)
     public Path workDir;
@@ -46,7 +50,7 @@ public class Args {
 
     @Parameter(names = {"--jckit"},
                required = true,
-               description = "Path to the root directory with JavaCard development kit",
+               description = "Path to the root directory with JavaCard development kit (required)",
                converter = JCKitConverter.class)
     public JavaCardSDK jcSDK;
 
@@ -62,12 +66,13 @@ public class Args {
     public boolean useSimulator = false;
 
     @Parameter(names = {"--executable"},
-               description = "Constructor or method to profile or leave unset to instrument applet entry point " +
-                             "constructor (constructors are custom and memory profiling only)")
+               description = "Unqualified method name to profile (e.g. myMethod). " +
+                             "Omit to profile the entry-point class constructor (constructors: custom and memory mode only)")
     public String executable;
 
     @Parameter(names = {"--entry-point"},
-               description = "Qualified name of a class to be used as an entry point (useful when there are more)")
+               description = "Fully-qualified class name of the applet entry point (e.g. com.example.MyApplet). " +
+                             "Required when the working directory contains more than one applet class")
     public String entryPoint;
 
     @Parameter(names = {"--install-params"},
@@ -102,26 +107,31 @@ public class Args {
 
     @Parameter(names = {"--reset-ins"},
                description = "Applet reset instruction in hex",
+               defaultValueDescription = "0x00",
                converter = ByteConverter.class)
     public Byte resetIns;
 
     @Parameter(names = {"--cla"},
                description = "Applet CLA in hex",
+               defaultValueDescription = "0x00",
                converter = ByteConverter.class)
     public byte cla = 0;
 
     @Parameter(names = {"--ins"},
                description = "Applet instruction in hex",
+               defaultValueDescription = "0x00",
                converter = ByteConverter.class)
     public byte ins = 0;
 
     @Parameter(names = {"--p1"},
                description = "Applet P1 in hex",
+               defaultValueDescription = "0x00",
                converter = ByteConverter.class)
     public byte p1 = 0;
 
     @Parameter(names = {"--p2"},
                description = "Applet P2 in hex",
+               defaultValueDescription = "0x00",
                converter = ByteConverter.class)
     public byte p2 = 0;
 

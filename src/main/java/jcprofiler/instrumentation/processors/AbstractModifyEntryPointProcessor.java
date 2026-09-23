@@ -56,7 +56,7 @@ public abstract class AbstractModifyEntryPointProcessor extends AbstractProfiler
      * @param fieldName custom instruction field name
      */
     protected void process(final CtClass<?> cls, final String fieldName) {
-        log.info("Instrumenting entry point class {}.", cls.getQualifiedName());
+        log.debug("Instrumenting entry point class {}.", cls.getQualifiedName());
 
         // get process(APDU) method
         final CtMethod<Void> processMethod = JCProfilerUtil.getProcessMethod(cls);

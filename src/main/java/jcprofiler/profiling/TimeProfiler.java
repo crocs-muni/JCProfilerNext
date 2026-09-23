@@ -60,12 +60,16 @@ public class TimeProfiler extends AbstractProfiler {
 
             // main profiling loop
             generateInputs(args.repeatCount);
+            final int progressStep = Math.max(1, args.repeatCount / 10);
             for (int round = 1; round <= args.repeatCount; round++) {
                 final CommandAPDU triggerAPDU = getInputAPDU(round);
 
                 final String input = Util.bytesToHex(triggerAPDU.getBytes());
-                log.info("Round: {}/{} APDU: {}", round, args.repeatCount, input);
+                log.debug("Round: {}/{} APDU: {}", round, args.repeatCount, input);
                 profileSingleStep(triggerAPDU);
+
+                if (round % progressStep == 0 || round == args.repeatCount)
+                    log.info("Progress: {}/{} rounds completed.", round, args.repeatCount);
             }
 
             // sanity check
@@ -94,7 +98,7 @@ public class TimeProfiler extends AbstractProfiler {
      * @throws RuntimeException if setting the next fatal performance trap failed
      */
     private void setTrap(short trapID) throws CardException {
-        log.debug("Setting next trap to {}.", getTrapName(trapID));
+        log.trace("Setting next trap to {}.", getTrapName(trapID));
 
         CommandAPDU setTrap = new CommandAPDU(args.cla, JCProfilerUtil.INS_PERF_HANDLER, 0, 0,
                                               Util.shortToByteArray(trapID));
@@ -123,7 +127,7 @@ public class TimeProfiler extends AbstractProfiler {
 
             // execute target operation
             final String trapName = getTrapName(trapID);
-            log.debug("Measuring {}.", trapName);
+            log.trace("Measuring {}.", trapName);
             final ResponseAPDU response = cardManager.transmit(triggerAPDU);
 
             // SW should be equal to the trap ID
@@ -137,7 +141,7 @@ public class TimeProfiler extends AbstractProfiler {
                 // we have not reached expected performance trap
                 unreachedTraps.add(trapName);
                 measurements.computeIfAbsent(trapName, k -> new ArrayList<>()).add(null);
-                log.debug("Duration: unreachable");
+                log.trace("Duration: unreachable");
                 continue;
             }
 
@@ -146,7 +150,7 @@ public class TimeProfiler extends AbstractProfiler {
             final long diff = currentTransmitDuration - prevTransmitDuration;
             prevTransmitDuration = currentTransmitDuration;
 
-            log.debug("Duration: {} ns", diff);
+            log.trace("Duration: {} ns", diff);
 
             // store the difference
             measurements.computeIfAbsent(getTrapName(trapID), k -> new ArrayList<>()).add(diff);

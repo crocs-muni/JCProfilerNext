@@ -146,7 +146,7 @@ public abstract class AbstractVisualiser {
      */
     private void loadCSV() {
         final Path csv = JCProfilerUtil.checkFile(args.workDir.resolve("measurements.csv"), Stage.profiling);
-        log.info("Loading measurements from {}.", csv);
+        log.debug("Loading measurements from {}.", csv);
 
         try (final CSVParser parser = CSVParser.parse(csv, Charset.defaultCharset(), JCProfilerUtil.getCSVFormat())) {
             final Iterator<CSVRecord> it = parser.iterator();
@@ -218,7 +218,7 @@ public abstract class AbstractVisualiser {
         final Path outputDir = JCProfilerUtil.getPerfOutputDirectory(args.workDir);
         JCProfilerUtil.recreateDirectory(outputDir);
 
-        log.info("Inserting measurements into sources.");
+        log.debug("Inserting measurements into sources.");
         final SpoonAPI spoon = JCProfilerUtil.getInstrumentedSpoon(args);
         spoon.setSourceOutputDirectory(outputDir.toFile());
         spoon.addProcessor(getInsertMeasurementsProcessor());
@@ -237,7 +237,7 @@ public abstract class AbstractVisualiser {
      * Generates the HTML page with interactive visualisation.
      */
     public void generateHTML() {
-        log.info("Initializing Apache Velocity.");
+        log.debug("Initializing Apache Velocity.");
         final Properties props = new Properties();
         props.put(RuntimeConstants.EVENTHANDLER_INCLUDE, IncludeRelativePath.class.getName());
         props.put(RuntimeConstants.RUNTIME_REFERENCES_STRICT, true);
@@ -268,7 +268,7 @@ public abstract class AbstractVisualiser {
         prepareVelocityContext(context);
 
         final Path output = args.workDir.resolve("measurements.html");
-        log.info("Generating {}.", output);
+        log.debug("Generating {}.", output);
 
         try (final Writer writer = new FileWriter(output.toFile())) {
             final Template template = velocityEngine.getTemplate("jcprofiler/visualisation/template.html.vm");

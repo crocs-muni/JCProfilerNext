@@ -77,7 +77,7 @@ public abstract class AbstractInsertTrapProcessor<T extends CtExecutable<?>> ext
         trapNamePrefix = JCProfilerUtil.getTrapNamePrefix(executable);
 
         // instrument
-        log.info("Instrumenting {}.", fullSignature);
+        log.debug("Instrumenting {}.", fullSignature);
 
         final CtBlock<?> block = executable.getBody();
         if (isEmptyBlock(block)) {

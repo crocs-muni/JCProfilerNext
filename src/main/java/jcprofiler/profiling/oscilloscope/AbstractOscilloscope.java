@@ -7,10 +7,15 @@ import jcprofiler.args.Args;
 import jcprofiler.profiling.oscilloscope.drivers.PicoScope4000Driver;
 import jcprofiler.profiling.similaritySearch.models.Trace;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 public abstract class AbstractOscilloscope {
+    private static final Logger log = LoggerFactory.getLogger(AbstractOscilloscope.class);
+
     protected int PICO_VARIANT_INFO = 3;
 
     // setup parameters
@@ -84,18 +89,6 @@ public abstract class AbstractOscilloscope {
         return new Trace("V", "ns", sampleNumber, voltValues, timeValues);
     }
 
-    /**
-     * Debug print
-     * @param format A format string
-     * @param args Arguments
-     */
-    protected void printDebug(String format, Object ... args) {
-        boolean DEBUG = false;
-        if (DEBUG) {
-            System.out.printf(format, args);
-        }
-    }
-
     /** Factory method
      *
      * @return constructed {@link AbstractOscilloscope} object
@@ -109,7 +102,7 @@ public abstract class AbstractOscilloscope {
                     return device;
                 }
             } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
-                e.printStackTrace();
+                log.debug("Failed to instantiate oscilloscope driver {}.", driver.getSimpleName(), e);
             }
         }
         throw new RuntimeException("No oscilloscope connected!");

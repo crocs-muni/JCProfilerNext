@@ -12,6 +12,13 @@ Prerequisites
 -------------
 * Install JDK 8 or newer.
 * Obtain a copy of the JavaCard Development Kit, e.g. from this link:https://github.com/martinpaljak/oracle_javacard_sdks[GitHub archive] maintained by Martin Paljak.
+* *(spa-time mode only)* A LEIA smartcard board and a PicoScope4000 oscilloscope.
+* *(spa-time mode only)* The PicoScope4000 native SDK, installed from the
+  link:https://www.picotech.com/downloads/sdk-release/pico-software-development-kit-64bit[official PicoScope SDK download page].
+* *(spa-time mode only)* The `jleia` thin JAR, which provides the LEIA board driver and is not published to any Maven repository:
+.. Clone and build link:https://github.com/xhanulik/jleia[xhanulik/jleia] (e.g. `./gradlew build`), which produces `build/libs/jleia-0.1.0.jar`.
+.. By default, JCProfilerNext's `build.gradle` expects this JAR at `../jleia/build/libs/jleia-0.1.0.jar` (i.e. `jleia` checked out as a sibling directory of `JCProfilerNext`).
+.. To use a different location, set the `JLEIA_JAR` environment variable to the JAR's path before building, e.g. `export JLEIA_JAR=/path/to/jleia-0.1.0.jar`.
 
 .Compatibility Matrix
 [cols="^1,^2"]
@@ -43,20 +50,13 @@ Compilation
 
 Execution modes
 ---------------
-The tool can be executed in four different modes (select with `--mode`):
+The tool can be executed in five different modes (select with `--mode`):
 
 * `custom` -- Instrument the applet with user-provided code snippets.  The user has to do the measurements on their own.
 * `memory` -- Measure memory usage.
 * `time` (default) -- Measure elapsed time via exception-based instrumentation using a card reader.
 * `stats` -- Collect API usage statistics.
 * `spa-time` -- Measure elapsed time via power trace analysis using an oscilloscope.
-
-NOTE: The `spa-time` mode uses Simple Power Analysis (SPA) to measure execution
-time by capturing the card's power consumption for the target method as a power trace via
-oscilloscope connected through a LEIA smartcard board. Timing is extracted by
-locating a user-provided delimiter pattern inside each captured trace.
-This mode is currently under development and available in the
-link:https://github.com/crocs-muni/JCProfilerNext/tree/spa-time[`spa-time` branch].
 
 Time Example
 ~~~~~~~~~~~~
@@ -203,9 +203,104 @@ javacard.security,KeyPair,genKeyPair(),1
 javacard.security,KeyPair,"KeyPair(byte,short)",1
 ----
 
+SPA Timer Mode
+~~~~~~~~~~~~~~
+The `spa-time` mode uses Simple Power Analysis (SPA) to measure execution
+time by capturing the card's power consumption for the target method as a power trace via
+oscilloscope connected through a LEIA smartcard board. Timing is extracted by
+locating a user-provided delimiter pattern inside each captured trace.
+
+Hardware requirements:
+
+* LEIA smartcard board connected to the host via USB serial port
+* PicoScope4000 oscilloscope with its native SDK installed
+* Card under test inserted into the LEIA board
+
+Hardware setup
+^^^^^^^^^^^^^^
+* Connect the LEIA board to the host computer (for power and serial control) and to the oscilloscope (data and trigger lines).
+* Connect the oscilloscope to the LEIA board (data and trigger lines).
+* Insert the card under test into the LEIA board.
+
+.Additional arguments for `spa-time` mode
+[cols="<2,^1,<4"]
+|===
+| Argument | Default | Description
+
+| `--delimiter`
+| *(none)*
+| Path to a CSV file containing the reference voltage trace segment used to locate measurement windows in each captured trace.
+
+| `--trace-dir`
+| *(none)*
+| Directory where raw captured traces are saved as CSV files.  If omitted, traces are not saved.
+
+| `--delimiter-num`
+| `3`
+| Number of patterns used to construct the delimiter.
+
+| `--voltage-threshold`
+| `1.0`
+| Oscilloscope trigger threshold in Volts.
+
+| `--delay`
+| `0`
+| Number of samples to capture before the trigger.
+
+| `--auto-trigger`
+| `5000`
+| Auto-trigger timeout in milliseconds.
+
+| `--time-interval`
+| `100`
+| Time interval between samples in nanoseconds.
+
+| `--samples`
+| `2000000`
+| Number of samples to collect per capture.
+
+| `--filter`
+| `10000`
+| Low-pass (Butterworth) filter cutoff frequency in Hz.  Set to `0` to disable filtering.
+
+| `--delimiter-distance`
+| `0`
+| Maximum allowed time between consecutive delimiter patterns in nanoseconds.  Set to `-1` for no limit.
+|===
+
+SPA Timer Example
+^^^^^^^^^^^^^^^^^
+Run as:
+
+[source,console]
+----
+$ ./gradlew run --args="--work-dir example --jckit jc222_kit --mode spa-time --executable example --ins 0xEE --data-regex 00[0-9A-F]{2} --repeat-count 100 --delimiter delimiter.csv"
+----
+JCProfilerNext will produce the same directory structure as in the time mode.
+The ATR field in `measurements.csv` will contain the physical card's ATR,
+even though the card is reached through the LEIA board.
+
+The `delimiter.csv` is the raw trace file containing the delimiter pattern.
+The delimiter pattern can be manually extracted from callibration trace when run without `--delimiter` set.
+
+NOTE: Automatic delimiter calibration without need to manually cut the trace is under development.
+
 Limitations
 -----------
 
 * Cards that require special communication procedures (e.g. `SecureChannel`) are not supported.
 * It is not possible to use a different JDK to compile the JavaCard applets and run this project.
 * Connection to wireless card terminals may occasionally fail.
+
+Licenses
+--------
+
+JCProfilerNext is licensed under the GNU General Public License v3.0 (GPLv3).
+This project includes components derived from the following third-party project:
+
+. picosdk-java-examples (https://github.com/picotech/picosdk-java-examples)
+** License: ISC License
+. SPA-Cryptographic-Operations-Extractor (https://github.com/crocs-muni/SPA-Cryptographic-Operations-Extractor)
+** License: MIT License
+
+See `THIRD_PARTY_NOTICES.txt` and `LICENSES/` for full details.

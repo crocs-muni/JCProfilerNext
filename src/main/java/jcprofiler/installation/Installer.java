@@ -1,4 +1,5 @@
 // SPDX-FileCopyrightText: 2022-2026 Lukáš Zaoral <lukaszaoral@outlook.com>
+// SPDX-FileCopyrightText: 2025-2026 Veronika Hanulikova <xhanulik@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-only
 
 package jcprofiler.installation;
@@ -6,6 +7,14 @@ package jcprofiler.installation;
 import apdu4j.BIBO;
 import apdu4j.CardBIBO;
 import apdu4j.TerminalManager;
+import jcprofiler.card.CardManagerTarget;
+import jcprofiler.card.CardTarget;
+import jcprofiler.card.LeiaTarget;
+import jleia.ATR;
+import jleia.LeiaBIBO;
+import jleia.Protocol;
+import jleia.TargetController;
+import jcprofiler.util.enums.Mode;
 import pro.javacard.gp.GPTool;
 
 import cz.muni.fi.crocs.rcard.client.CardManager;
@@ -64,17 +73,14 @@ public class Installer {
      *
      * @param  args       object with commandline arguments
      * @param  entryPoint applet entry point class
-     * @return            {@link CardManager} connection instance
+     * @return            {@link CardTarget} connection instance
      *
-     * @throws RuntimeException if the applet could not be installed or selected successfully
+     * @throws RuntimeException              if the applet could not be installed or selected successfully
+     * @throws UnsupportedOperationException if installation is not supported for the selected mode
      */
-    public static CardManager installOnCard(final Args args, final CtClass<?> entryPoint) {
+    public static CardTarget installOnCard(final Args args, final CtClass<?> entryPoint) {
         if (args.useSimulator)
             throw new UnsupportedOperationException("Installation on a simulator is not possible");
-
-        // connect to the card
-        final CardManager cardManager = connectToCard(/* select */ false);
-        final BIBO bibo = CardBIBO.wrap(cardManager.getChannel().getCard());
 
         // get path to CAP package
         final Path capPath = JCProfilerUtil.getAppletOutputDirectory(args.workDir)
@@ -90,6 +96,19 @@ public class Installer {
         if (args.key != null)
             gpArgv = ArrayUtils.insert(gpArgv.length, gpArgv, "--key", Util.bytesToHex(args.key));
 
+        // connect and set up a BIBO channel for GPTool
+        final CardTarget cardTarget;
+        final BIBO bibo;
+        if (args.mode == Mode.spa_time) {
+            final LeiaTarget leiaTarget = connectToLeiaBoard(/* select */ false);
+            cardTarget = leiaTarget;
+            bibo = new LeiaBIBO(leiaTarget.getTargetController());
+        } else {
+            final CardManager cardManager = connectToCard(/* select */ false);
+            cardTarget = new CardManagerTarget(cardManager);
+            bibo = CardBIBO.wrap(cardManager.getChannel().getCard());
+        }
+
         // be very careful to not destroy the card!!!
         log.info("Executing GlobalPlatformPro to install {}.", capPath);
         log.debug("GlobalPlatformPro argv: {}", Arrays.toString(gpArgv));
@@ -98,26 +117,31 @@ public class Installer {
             throw new RuntimeException("GlobalPlatformPro exited with non-zero code: " + ret);
 
         // select the applet
+        log.info("Selecting profiled applet on card.");
         try {
-            selectApplet(cardManager);
+            ResponseAPDU response = cardTarget.transmit(new CommandAPDU(0x00, 0xa4, 0x04, 0x00, APPLET_AID));
+            if (response.getSW() != JCProfilerUtil.SW_NO_ERROR)
+                throw new CardException("Applet could not be selected. SW: " + Integer.toHexString(response.getSW()));
         } catch (CardException e) {
             throw new RuntimeException(e);
         }
 
-        return cardManager;
+        return cardTarget;
     }
 
     /**
-     * Either connects to a physical card or to simulator depending on the
+     * Either connects to a physical card, simulator, or LEIA board depending on the
      * commandline arguments.
      *
      * @param  args       object with commandline arguments
      * @param  entryPoint applet entry point class
-     * @return            {@link CardManager} connection instance
+     * @return            {@link CardTarget} connection instance
      */
-    public static CardManager connect(final Args args, final CtClass<?> entryPoint) {
-        return args.useSimulator ? configureSimulator(args, entryPoint)
-                                 : connectToCard(/* select */ true);
+    public static CardTarget connect(final Args args, final CtClass<?> entryPoint) {
+        if (args.mode == Mode.spa_time)
+            return connectToLeiaBoard(/* select */ true);
+        return new CardManagerTarget(args.useSimulator ? configureSimulator(args, entryPoint)
+                : connectToCard(/* select */ true));
     }
 
     /**
@@ -138,7 +162,7 @@ public class Installer {
 
         // get path to JAR archive
         final Path jarPath = JCProfilerUtil.getAppletOutputDirectory(args.workDir)
-                        .resolve(entryPoint.getPackage().getSimpleName() + ".jar");
+                .resolve(entryPoint.getPackage().getSimpleName() + ".jar");
         JCProfilerUtil.checkFile(jarPath, Stage.compilation);
         final CardManager cardManager = new CardManager(/* logging */ true, APPLET_AID);
 
@@ -245,6 +269,42 @@ public class Installer {
         } catch (CardException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static LeiaTarget connectToLeiaBoard(boolean select) {
+        log.info("Connecting to a LEIA board.");
+        final TargetController targetController = new TargetController();
+
+        log.info("Looking for LEIA board with a card.");
+        while (!targetController.open()) {
+            log.warn("No connected LEIA board found!");
+            log.info("Waiting for a LEIA board.");
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException ignored) {}
+        }
+
+        while (!targetController.isCardInserted()) {
+            log.warn("No connected card to LEIA board found!");
+            log.info("Waiting for a card connected to LEIA board.");
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException ignored) {}
+        }
+        log.info("Successfully connected.");
+        log.info("Configuring a card in LEIA board.");
+        targetController.configureSmartcard(Protocol.T1, 0, 0, true, true);
+        ATR atr = targetController.getATR();
+        log.info("Using protocol T={} and the frequency of the ISO7816 clock {} kHz.", atr.getProtocol(), atr.getMaxFrequencyHz() / 1000);
+
+        if (select) {
+            log.info("Selecting profiled applet on card.");
+            CommandAPDU cmd = new CommandAPDU(0x00, 0xa4, 0x04, 0x00, APPLET_AID);
+            ResponseAPDU response = targetController.sendAPDU(cmd);
+            if (response.getSW() != JCProfilerUtil.SW_NO_ERROR)
+                throw new RuntimeException("Applet could not be selected. SW: " + Integer.toHexString(response.getSW()));
+        }
+        return new LeiaTarget(targetController);
     }
 
     /**

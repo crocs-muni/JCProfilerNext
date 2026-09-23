@@ -1,11 +1,11 @@
 // SPDX-FileCopyrightText: 2022-2026 Lukáš Zaoral <lukaszaoral@outlook.com>
+// SPDX-FileCopyrightText: 2025-2026 Veronika Hanulikova <xhanulik@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-only
 
 package jcprofiler;
 
-import cz.muni.fi.crocs.rcard.client.CardManager;
-
 import jcprofiler.args.Args;
+import jcprofiler.card.CardTarget;
 import jcprofiler.compilation.Compiler;
 import jcprofiler.installation.Installer;
 import jcprofiler.instrumentation.Instrumenter;
@@ -73,14 +73,14 @@ public class JCProfiler {
             return;
 
         // Installation
-        CardManager cardManager = null;
+        CardTarget cardTarget = null;
         if (args.startFrom.ordinal() <= Stage.installation.ordinal()) {
             // noop for --simulator
             if (args.useSimulator) {
                 log.info("Skipping installation because simulator is used.");
             } else {
                 log.info("Installation started.");
-                cardManager = Installer.installOnCard(args, entryPoint);
+                cardTarget = Installer.installOnCard(args, entryPoint);
                 log.info("Installation complete.");
             }
         }
@@ -91,15 +91,23 @@ public class JCProfiler {
         // Profiling
         if (args.startFrom.ordinal() <= Stage.profiling.ordinal()) {
             // Connect if the installation was skipped or simulator is used
-            if (cardManager == null)
-                // TODO: move connection stuff to a separate class?
-                cardManager = Installer.connect(args, entryPoint);
+            if (cardTarget == null)
+                cardTarget = Installer.connect(args, entryPoint);
 
             log.info("Profiling started.");
-            final AbstractProfiler profiler = AbstractProfiler.create(args, cardManager, model);
-            profiler.profile();
-            profiler.generateCSV();
+            final CardTarget target = cardTarget;
+            try {
+                final AbstractProfiler profiler = AbstractProfiler.create(args, cardTarget, model);
+                profiler.profile();
+                profiler.generateCSV();
+            } catch (Exception e) {
+                target.disconnect();
+                throw e;
+            }
+
             log.info("Profiling complete.");
+            target.disconnect();
+            log.info("Disconnected from card.");
         }
 
         if (args.stopAfter == Stage.profiling)

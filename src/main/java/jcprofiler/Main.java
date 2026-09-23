@@ -130,6 +130,11 @@ public class Main {
         System.out.println("  # Collect API usage statistics:");
         System.out.println("  JCProfilerNext --work-dir path/to/applet --jckit path/to/jc222_kit --mode stats");
         System.out.println();
+        System.out.println("  # Measure elapsed time via a LEIA board and oscilloscope (spa-time mode):");
+        System.out.println("  JCProfilerNext --work-dir path/to/applet --jckit path/to/jc304_kit \\");
+        System.out.println("                 --entry-point com.example.MyApplet --executable myMethod \\");
+        System.out.println("                 --repeat-count 10 --data-regex \"[0-9A-F]{64}\" --mode spa-time");
+        System.out.println();
         System.out.println("  # Run only instrumentation and compilation, skip installation/profiling:");
         System.out.println("  JCProfilerNext --work-dir path/to/applet --jckit path/to/jc222_kit \\");
         System.out.println("                 --stop-after compilation");

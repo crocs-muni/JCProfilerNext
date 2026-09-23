@@ -13,10 +13,14 @@ import jcprofiler.profiling.oscilloscope.AbstractOscilloscope;
 import jcprofiler.profiling.oscilloscope.drivers.libraries.PicoScope4000Library;
 import jcprofiler.profiling.similaritySearch.models.Trace;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.nio.charset.StandardCharsets;
 
 
 public class PicoScope4000Driver extends AbstractOscilloscope {
+    private static final Logger log = LoggerFactory.getLogger(PicoScope4000Driver.class);
 
     short handle = 0;
     String deviceName;
@@ -71,7 +75,7 @@ public class PicoScope4000Driver extends AbstractOscilloscope {
 
         if (status != PicoScope4000Library.PS4000_OK) {
             // do not throw exception here
-            printDebug("> Opening device NOK\n");
+            log.debug("Opening device failed with status code: {}", status);
             return false;
         }
 
@@ -90,7 +94,7 @@ public class PicoScope4000Driver extends AbstractOscilloscope {
         }
         // get device name
         deviceName = new String(info, StandardCharsets.UTF_8).substring(0, infoLength.getValue() - 1) ;
-        System.out.println("Connected device: " + deviceName);
+        log.info("Connected device: {}", deviceName);
         return true;
     }
 
@@ -144,7 +148,7 @@ public class PicoScope4000Driver extends AbstractOscilloscope {
             throw new RuntimeException("No timebase fitting arguments found");
         }
         timebase = currentTimebase - 1;
-        System.out.printf("Device %s setup - Timebase: %d, time interval: %d, samples: %d\n",
+        log.info("Device {} setup - Timebase: {}, time interval: {}, samples: {}",
                 deviceName, currentTimebase, timeInterval, numberOfSamples);
     }
 
@@ -178,7 +182,7 @@ public class PicoScope4000Driver extends AbstractOscilloscope {
             try {
                 status = PicoScope4000Library.INSTANCE.ps4000IsReady(handle, ready);
                 Thread.sleep(100);
-                System.out.println("...waiting for data...");
+                log.trace("Waiting for data...");
             } catch (Exception e) {
                 throw new RuntimeException("ps4000IsReady failed with exception: " + e.getMessage());
             }
@@ -210,7 +214,7 @@ public class PicoScope4000Driver extends AbstractOscilloscope {
         if (status != PicoScope4000Library.PS4000_OK) {
             throw new RuntimeException("ps4000GetValues failed with error code: " + status);
         }
-        System.out.printf("Captured %d samples\n", adcValuesLength.getValue());
+        log.debug("Captured {} samples.", adcValuesLength.getValue());
     }
 
     private double[] getVoltValues() {
@@ -267,12 +271,12 @@ public class PicoScope4000Driver extends AbstractOscilloscope {
             stopDevice();
         } catch (Exception e) {
             // try to close device anyway
-            System.out.println(e.getMessage());
+            log.warn("Failed to stop device: {}", e.getMessage());
         }
 
         // close device
         PicoScope4000Library.INSTANCE.ps4000CloseUnit(handle);
         handle = 0;
-        System.out.printf("Device %s disconnected\n", deviceName);
+        log.info("Device {} disconnected.", deviceName);
     }
 }

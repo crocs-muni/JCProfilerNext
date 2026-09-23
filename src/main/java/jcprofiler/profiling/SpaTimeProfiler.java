@@ -118,13 +118,20 @@ public class SpaTimeProfiler extends AbstractProfiler {
                     unsuccessfulMeasurements++;
                 }
             }
-            // close connection to oscilloscope
-            oscilloscope.finish();
-
         } catch (CardException | InterruptedException | IOException e) {
-            if (oscilloscope != null)
-                oscilloscope.finish();
             throw new RuntimeException(e);
+        } finally {
+            // close connection to oscilloscope, regardless of whether profiling
+            // completed normally, threw a checked exception, or threw a RuntimeException
+            // (e.g. from the oscilloscope/search driver code) — otherwise the PicoScope
+            // is left open or still running on such failures
+            if (oscilloscope != null) {
+                try {
+                    oscilloscope.finish();
+                } catch (Exception e) {
+                    log.warn("Failed to close oscilloscope connection.", e);
+                }
+            }
         }
 
         log.info("Final number of measurements: {}", args.repeatCount - unsuccessfulMeasurements);

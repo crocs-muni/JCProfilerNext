@@ -190,7 +190,7 @@ public class SpaTimeProfiler extends AbstractProfiler {
             // adjust main trace file name
             Path currentTracePath = args.traceDir.resolve("trace_" + round + ".csv");
             DataManager.saveTrace(currentTracePath.toAbsolutePath().toString(),
-                    operationTrace, 0, operationTrace.getDataCount() - 1);
+                    operationTrace, 0, operationTrace.getDataCount());
             log.debug("Trace {} saved.", currentTracePath.getFileName());
         }
 

@@ -32,14 +32,34 @@ Prerequisites
 |===
 
 
+Installation
+------------
+Prebuilt artifacts are produced by the
+link:https://github.com/crocs-muni/JCProfilerNext/actions/workflows/build-artifacts.yml[`Build artifacts`]
+workflow on every push and for every pushed `v*` tag, and can be downloaded
+from that workflow run's "Artifacts" section. Tagged versions are additionally
+published on the
+link:https://github.com/crocs-muni/JCProfilerNext/releases[GitHub Releases page].
+
+* `JCProfilerNext-<version>.jar` -- a self-contained JAR. Requires a JDK 8 or
+  newer to be installed; run with `java -jar JCProfilerNext-<version>.jar --help`.
+* `JCProfilerNext-linux-x64.zip` / `JCProfilerNext-windows-x64.zip` -- a
+  self-contained native application bundling its own Java runtime, so no JDK
+  installation is required. After extracting, run
+  `./JCProfilerNext/bin/JCProfilerNext --help` on Linux or
+  `JCProfilerNext\JCProfilerNext.exe --help` on Windows.
+
 Compilation
 -----------
 . Clone this repository.
 . Run `./gradlew build` on Unix-like systems or `gradlew.bat build` on Windows.
 . Execute
 .. directly using Gradle: `./gradlew run --args='--help'`.
-.. directly using built JAR: `java -jar build/libs/JCProfilerNext-1.0-SNAPSHOT.jar --help`.
+.. directly using built JAR: `java -jar build/libs/JCProfilerNext-<version>.jar --help`.
 .. directly from distribution archives in `build/distributions`.
+.. as a self-contained native application: run `./gradlew jpackage`, which
+   produces an application image bundling a JRE in `build/jpackage/JCProfilerNext`
+   (requires JDK 17 or newer to build, due to the `jpackage` tool).
 
 Execution modes
 ---------------

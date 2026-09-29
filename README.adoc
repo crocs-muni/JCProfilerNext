@@ -323,6 +323,49 @@ Hardware setup
 
 SPA Timer Example
 ^^^^^^^^^^^^^^^^^
+Consider the `example` method in the following class.
+
+[source,java]
+----
+package example;
+
+import javacard.framework.*;
+
+public class Example extends Applet {
+    public static final byte INS_EXAMPLE = (byte) 0xEE;
+
+    Example() { }
+
+    public static void install(byte[] bArray, short bOffset, byte bLength) {
+        new Example().register();
+    }
+
+    @Override
+    public void process(APDU apdu) throws ISOException {
+        if (selectingApplet())
+            return;
+
+        switch (apdu.getBuffer()[ISO7816.OFFSET_INS]) {
+            case INS_EXAMPLE:
+                example(apdu);
+                break;
+            default:
+                ISOException.throwIt(ISO7816.SW_INS_NOT_SUPPORTED);
+        }
+    }
+
+    private void example(APDU apdu) {
+        short count = Util.getShort(apdu.getBuffer(), ISO7816.OFFSET_CDATA);
+        for (short i = 0; i < count; i++) {
+            short tmp = 0;
+            for (short k = 0; k < 50; k++) {
+                tmp++;
+            }
+        }
+    }
+}
+----
+
 Run as:
 
 [source,console]
@@ -335,8 +378,6 @@ even though the card is reached through the LEIA board.
 
 The `delimiter.csv` is the raw trace file containing the delimiter pattern.
 The delimiter pattern can be manually extracted from callibration trace when run without `--delimiter` set.
-
-NOTE: Automatic delimiter calibration without need to manually cut the trace is under development.
 
 FAQ
 ---

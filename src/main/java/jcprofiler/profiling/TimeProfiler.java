@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2017-2021 Petr Švenda <petrsgit@gmail.com>
+// SPDX-FileCopyrightText: 2017-2026 Petr Švenda <petrsgit@gmail.com>
 // SPDX-FileCopyrightText: 2022-2026 Lukáš Zaoral <lukaszaoral@outlook.com>
 // SPDX-License-Identifier: GPL-3.0-only
 

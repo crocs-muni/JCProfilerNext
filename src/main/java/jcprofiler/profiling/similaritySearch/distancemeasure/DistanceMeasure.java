@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2019 Martin Podhora (martinftlsx)
+// SPDX-FileCopyrightText: 2019-2026 Martin Podhora (martinftlsx)
 // SPDX-License-Identifier: MIT
 
 /**

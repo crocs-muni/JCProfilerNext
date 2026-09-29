@@ -1,4 +1,5 @@
 // SPDX-FileCopyrightText: 2026 Veronika Hanulikova <xhanulik@gmail.com>
+// SPDX-FileCopyrightText: 2019-2026 Martin Podhora (martinftlsx)
 // SPDX-License-Identifier: GPL-3.0-only
 
 package jcprofiler.profiling.similaritySearch.gui;
@@ -45,6 +46,8 @@ import java.util.List;
  * marked region is then cut out and used as the delimiter trace for the SPA
  * time profiler's similarity search, in place of a pre-supplied
  * {@code --delimiter} CSV file.
+ * 
+ * Modification of GUI from: https://github.com/crocs-muni/SPA-Cryptographic-Operations-Extractor
  */
 public class DelimiterCutterDialog extends JDialog {
 
